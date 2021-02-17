@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://meow.plus/mirror-apply/schema",
+
+  "definitions": {
+    "step": {
+      "type": "object",
+      "oneOf": [{
+        "type": "object",
+        "properties": {
+          "manually": { "type": "string" }
+        },
+        "required": ["manually"],
+        "additionalProperties": false
+      }, {
+        "type": "object",
+        "properties": {
+          "replace-file": { "type": "string" },
+          "with": { "type": "string" }
+        },
+        "required": ["replace-file", "with"],
+        "additionalProperties": false
+      }, {
+        "type": "object",
+        "properties": {
+          "run": { "type": "string" },
+          "with": { "type": "string" }
+        },
+        "required": ["run"],
+        "additionalProperties": false
+      }]
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "args": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z_]+[A-Z0-9_]*$": {
+          "type": "object",
+          "properties": {
+            "description": { "type": "string" },
+            "obtained-by": { "type": "string" },
+            "default": { "type": "string" },
+            "possible-value": {
+              "anyOf": [{
+                "type": "string",
+                "format": "regex"
+              }, {
+                "type": "array",
+                "items": { "type": "string" }
+              }]
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "steps": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z\\-]+[a-z0-9\\-]*$": {
+          "$ref": "#/definitions/step"
+        }
+      },
+      "additionalProperties": false
+    },
+    "procedures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "when": {
+            "type": "object",
+            "patternProperties": {
+              "^[A-Z_]+[A-Z0-9_]*$": { "type": "string" }
+            }
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "oneOf": [{
+                "type": "object",
+                "properties": {
+                  "do": { "type": "string" }
+                },
+                "required": ["do"],
+                "additionalProperties": false
+              }, {
+                "$ref": "#/definitions/step"
+              }]
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["procedures"],
+  "additionalProperties": false
+}
