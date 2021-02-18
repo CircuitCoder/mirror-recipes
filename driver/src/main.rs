@@ -17,7 +17,7 @@ fn main(args: Args) -> anyhow::Result<()> {
     } = args;
 
     match cmd {
-        Command::Apply { preset, recipe } => {
+        Command::Apply { preset, recipe, .. } => {
             let preset_path = preset.as_ref().map(|p| {
                 let mut path = storage.clone();
                 path.push("presets");
