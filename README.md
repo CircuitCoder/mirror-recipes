@@ -6,10 +6,12 @@ This is a WIP effort to provider general recipes for applying mirrors of various
 ## Well-known parameters names
 Some special parameters are handled differently. These include:
 
-- BASE: Mirror base. This may be expanded from an well-known shorthand (e.g. TUNA + ubuntu recipe expands to https://mirrors.tuna.tsinghua.edu.cn/ubuntu)
 - ARCH: Host archetecture
 - OS: Host OS
 - DIST: Host Linux distribution (Only when running on Linux)
+
+## Site presets
+Well-known mirrors have presets for various recipes. For example, using the TUNA preset on the ubuntu recipe avoids manually setting the BASE parameter.
 
 ## Step types
 A step may have one of the following three types:

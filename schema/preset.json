@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://meow.plus/mirror-apply/schema/preset",
+
+  "type": "object",
+  "properties": {
+    "fullname": { "type": "string" },
+    "homepage": { "type": "string" },
+    "presets": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "patternProperties": {
+            "^[A-Z_]+[A-Z0-9_]*$": { "type": "string" }
+          }
+        }
+      }
+    }
+  },
+
+  "required": ["presets"]
+}
