@@ -8,9 +8,16 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0.38"
+bat = "0.17.1"
+colored = "2.0.0"
+dialoguer = { git="https://github.com/CircuitCoder/dialoguer" }
 env_logger = "0.8.3"
 log = "0.4.14"
 paw = "1.0.0"
+regex = "1.4.3"
 serde = { version="1.0.123", features=["derive"] }
+serde_with = "1.6.4"
 serde_yaml = "0.8.17"
 structopt = { version="0.3.21", features=["paw"] }
+syntect = "4.5.0"
+tempfile = "3.2.0"

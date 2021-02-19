@@ -1,12 +1,13 @@
 mod args;
-mod recipe;
+mod exec;
 mod preset;
+mod recipe;
 
-use std::{collections::HashMap, fs::File};
+use std::{collections::HashMap, fs::File, path::PathBuf};
 
-use recipe::*;
 use args::*;
 use preset::*;
+use recipe::*;
 
 #[paw::main]
 fn main(args: Args) {
@@ -22,19 +23,23 @@ fn main(args: Args) {
 }
 
 fn inner_main(args: Args) -> anyhow::Result<()> {
-    let Args {
-        cmd, storage,
-    } = args;
+    let Args { cmd, storage } = args;
 
     match cmd {
         Command::Apply {
             preset,
             recipe,
-            params,
+            params: cli_params,
             non_interactive,
             no_overwrite_backup,
             dry_run,
+            shell,
         } => {
+            let shell = shell.or(std::env::var_os("SHELL").map(PathBuf::from));
+            let shell = shell.ok_or(anyhow::anyhow!(
+                "Cannot determine shell path from $SHELL. Use -s to specify explicitly."
+            ))?;
+
             let preset_path = preset.as_ref().map(|p| {
                 let mut path = storage.clone();
                 path.push("presets");
@@ -45,37 +50,77 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             recipe_path.push("recipes");
             recipe_path.push(recipe.clone() + ".yaml");
 
-            let recipe_file: Recipe = serde_yaml::from_reader(File::open(&recipe_path).map_err(
-                |_| anyhow::anyhow!("Recipe not found: {}", recipe)
-            )?)?;
+            let recipe_file: Recipe = serde_yaml::from_reader(
+                File::open(&recipe_path)
+                    .map_err(|_| anyhow::anyhow!("Recipe not found: {}", recipe))?,
+            )?;
             let preset_file: Option<Preset> = match preset_path {
                 None => None,
-                Some(p) => serde_yaml::from_reader(File::open(&p).map_err(
-                    |_| anyhow::anyhow!("Preset not found: {}", preset.clone().unwrap())
-                )?)?,
+                Some(p) => serde_yaml::from_reader(File::open(&p).map_err(|_| {
+                    anyhow::anyhow!("Preset not found: {}", preset.clone().unwrap())
+                })?)?,
             };
-            log::debug!("{:#?}", recipe_file);
-            log::debug!("{:#?}", preset_file);
 
-            let mut joint_params = if let Some(mut pf) = preset_file {
+            let mut params_stash = if let Some(mut pf) = preset_file {
                 match pf.presets.remove(&recipe) {
                     None => {
                         log::error!("Preset `{}` is not applicable to recipe `{}`. Use the subcommand `show preset` to show applicable recipes.", preset.unwrap(), recipe);
                         return Err(anyhow::anyhow!("Invalid parameters"));
-                    },
+                    }
                     Some(inner) => inner,
                 }
             } else {
                 HashMap::new()
             };
 
-            joint_params.extend(params.into_iter());
+            params_stash.extend(cli_params.into_iter());
+
+            let Recipe {
+                params: param_spec,
+                steps,
+                procedures,
+            } = recipe_file;
+
+            // Validate params
+            let mut invalid_params = Vec::new();
+            let mut params = HashMap::new();
+            for (key, spec) in param_spec {
+                let cli_value = params_stash.remove(&key);
+
+                if non_interactive {
+                    match spec.get_non_interactive(cli_value, &shell)? {
+                        Some(v) => {
+                            params.insert(key, v);
+                        }
+                        None => {
+                            invalid_params.push(key);
+                        }
+                    }
+                } else {
+                    let value = spec.get_interactive(&key, cli_value, &shell)?;
+                    params.insert(key, value);
+                }
+            }
+
+            if invalid_params.len() > 0 {
+                return Err(anyhow::anyhow!("Invalid parameters: {}", invalid_params.join(", ")));
+            }
+
+            // Find matching proc
+            let proc = procedures.into_iter().find(|p| p.test(&params));
+            let proc = proc.ok_or(anyhow::anyhow!("No matching procedure found"))?;
+
+            log::debug!("{:#?}", proc);
+            log::debug!("{:#?}", steps);
 
             unimplemented!()
-        },
+        }
         Command::List(_) => unimplemented!(),
         Command::Show(_) => unimplemented!(),
-        Command::Update { presets, recipes, upstream } => unimplemented!(),
+        Command::Update {
+            presets,
+            recipes,
+            upstream,
+        } => unimplemented!(),
     }
 }
-

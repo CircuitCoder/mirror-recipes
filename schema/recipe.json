@@ -38,22 +38,33 @@
       "type": "object",
       "patternProperties": {
         "^[A-Z_]+[A-Z0-9_]*$": {
-          "type": "object",
-          "properties": {
-            "description": { "type": "string" },
-            "obtained-by": { "type": "string" },
-            "default": { "type": "string" },
-            "possible-value": {
-              "anyOf": [{
-                "type": "string",
-                "format": "regex"
-              }, {
-                "type": "array",
-                "items": { "type": "string" },
-                "minLength": 1
-              }]
+          "allOf": [{
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "possible-value": {
+                "anyOf": [{
+                  "type": "string",
+                  "format": "regex"
+                }, {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minLength": 1
+                }]
+              }
             }
-          }
+          }, {
+            "oneOf": [{
+              "type": "object",
+              "properties": {
+                "obtained-by": { "type": "string" }
+              }
+            }, {
+              "properties": {
+                "default": { "type": "string" }
+              }
+            }]
+          }]
         }
       },
       "additionalProperties": false
