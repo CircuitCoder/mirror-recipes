@@ -681,6 +681,7 @@ dependencies = [
  "serde_yaml",
  "structopt",
  "syntect",
+ "sys-info",
  "tempfile",
 ]
 
@@ -1139,6 +1140,16 @@ dependencies = [
  "serde_json",
  "walkdir",
  "yaml-rust",
+]
+
+[[package]]
+name = "sys-info"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f3e7ba888a12ddcf0084e36ae4609b055845f38022d1946b67356fbc27d5795"
+dependencies = [
+ "cc",
+ "libc",
 ]
 
 [[package]]

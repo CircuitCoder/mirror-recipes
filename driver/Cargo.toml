@@ -20,4 +20,5 @@ serde_with = "1.6.4"
 serde_yaml = "0.8.17"
 structopt = { version="0.3.21", features=["paw"] }
 syntect = "4.5.0"
+sys-info = "0.8.0"
 tempfile = "3.2.0"

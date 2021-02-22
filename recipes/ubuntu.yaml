@@ -1,4 +1,5 @@
 params:
+  DIST: {}
   RELEASE:
     description: The formal release name of the ubuntu version
     possible-value:

@@ -4,11 +4,13 @@
 This is a WIP effort to provider general recipes for applying mirrors of various opensource projects. The recipes can be executed (with a driver) as a script, used as a source to render help entries, or directly used as a reference for command-line users.
 
 ## Well-known parameters names
-Some special parameters are handled differently. These include:
+Some special parameters are automatically detected in a best-effort manner. These include:
 
 - ARCH: Host archetecture
 - OS: Host OS
 - DIST: Host Linux distribution (Only when running on Linux)
+
+Note that these parameters are just plain parameters in other aspects. So to use them, script must list them in the params sections.
 
 ## Site presets
 Well-known mirrors have presets for various recipes. For example, using the TUNA preset on the ubuntu recipe avoids manually setting the BASE parameter.
