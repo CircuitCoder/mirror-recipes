@@ -1,6 +1,4 @@
-use std::{collections::HashMap, path::Path};
-
-use bat::PrettyPrinter;
+use std::{collections::HashMap, ffi::{OsStr, OsString}, io::Write, path::Path};
 use colored::Colorize;
 use serde::Deserialize;
 use serde_with::serde_as;
@@ -73,11 +71,12 @@ pub struct Proc {
 }
 
 impl Step {
-    pub fn execute(
+    pub fn execute<P: AsRef<Path>>(
         &self,
         non_interactive: bool,
         default_replace_backup: bool,
         dry_run: bool,
+        shell: P,
         params: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         match self {
@@ -89,6 +88,7 @@ impl Step {
                 non_interactive,
                 default_replace_backup,
                 dry_run,
+                shell,
                 params,
             ),
             Step::Append { append, with } => Self::modify_file(
@@ -98,6 +98,7 @@ impl Step {
                 non_interactive,
                 default_replace_backup,
                 dry_run,
+                shell,
                 params,
             ),
             Step::Run { run, with } => {
@@ -107,13 +108,14 @@ impl Step {
         }
     }
 
-    fn modify_file<P: AsRef<Path>>(
-        path: P,
+    fn modify_file<P1: AsRef<Path>, P2: AsRef<Path>>(
+        path: P1,
         content: &str,
         append: bool,
         non_interactive: bool,
         default_replace_backup: bool,
         dry_run: bool,
+        shell: P2,
         params: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         let path_disp = format!("{}", path.as_ref().display());
@@ -130,9 +132,87 @@ impl Step {
         let interpolated = crate::params::expand(content, params)?;
 
         // Ignore printed result
-        bat::PrettyPrinter::new().input_from_bytes(interpolated.as_bytes()).print().unwrap();
+        bat::PrettyPrinter::new()
+            .input_from_bytes(interpolated.as_bytes())
+            .line_numbers(true)
+            .grid(true)
+            .print().unwrap();
 
-        todo!()
+        // Detect backup file
+        let mut backup_file = path.as_ref().to_path_buf();
+        let mut backup_file_name = match backup_file.file_name() {
+            None => OsString::new(),
+            Some(filename) => OsString::from(filename),
+        };
+        backup_file_name.push(".mr-bak");
+        backup_file.set_file_name(backup_file_name);
+
+        let formatted_backup_file = format!("{}", backup_file.display());
+
+        loop {
+            let target_exists = path.as_ref().exists();
+            let backup_exists = backup_file.exists();
+            if target_exists && backup_exists {
+                println!("Backup file at {} already exists. Choose one action:", formatted_backup_file.blue());
+                println!("{}: Keep current file at {}", "K".magenta(), formatted_backup_file.blue());
+                println!("{}: Overwrite", "O".magenta());
+            } else {
+                if target_exists {
+                    println!("Original file will be moved to {}. Choose one action:", formatted_backup_file.blue());
+                } else {
+                    println!("A new file will be created. Choose one action:");
+                }
+                println!("{}: Confirm", "Y".magenta());
+            }
+            println!("{}: Cancel and stop the recipe now", "N".magenta());
+            println!("{}: Spin up a shell to examine", "S".magenta());
+            println!("{}: Do nothing and continue", "C".magenta());
+
+            let prompt = if target_exists && backup_exists {
+                "K/O/N/S/C"
+            } else {
+                "Y/N/S/C"
+            };
+
+            let input = dialoguer::Input::new()
+                .with_prompt(prompt).validate_with(|input: &String| -> Result<(), &str> {
+                    if input.len() != 1 {
+                        Err("Please input only one character")
+                    } else {
+                        let c = input.chars().next().unwrap();
+                        let c = c.to_ascii_uppercase();
+                        if target_exists && backup_exists && (c == 'K' || c == 'O') { Ok(()) }
+                        else if !(target_exists && backup_exists) && c == 'Y' { Ok(()) }
+                        else if c == 'S' || c == 'C' || c == 'N' { Ok(()) }
+                        else { Err("Please choose one of the options") }
+                    }
+                }).interact()?;
+
+            let action = input.chars().next().unwrap().to_ascii_uppercase();
+            match action {
+                'C' => break Ok(()),
+                'N' => break Err(anyhow::anyhow!("User canceled")),
+                'S' => { crate::exec::exec_blocking_shell(&shell)?; },
+                'Y' | 'O' => {
+                    if target_exists {
+                        std::fs::rename(&path, &backup_file)?;
+                    }
+
+                    // TODO: restore umask
+                    let mut f = std::fs::File::create(&path)?;
+                    f.write_all(interpolated.as_bytes())?;
+
+                    break Ok(())
+                },
+                'K' => {
+                    let mut f = std::fs::File::create(&path)?;
+                    f.write_all(interpolated.as_bytes())?;
+
+                    break Ok(())
+                },
+                _ => panic!("Unexpected input {}", action),
+            }
+        }
     }
 }
 
@@ -174,7 +254,7 @@ impl Param {
         match self.default {
             None => Ok(None),
             Some(DefaultValue::ObtainedBy(s)) => {
-                let result = crate::exec::exec_blocking(&shell, &s)?;
+                let result = crate::exec::exec_blocking(&shell, Some(&s))?;
                 Ok(Some(result))
             }
             Some(DefaultValue::Default(v)) => Ok(Some(v)),
@@ -242,7 +322,7 @@ impl Param {
             let result = &options[result];
             let result = match result {
                 ParamSelect::Execute(s) => {
-                    let r = crate::exec::exec_blocking(&shell, &s)?;
+                    let r = crate::exec::exec_blocking(&shell, Some(&s))?;
                     let r = r.trim().to_string();
                     println!("Execution result: \"{}\"", r.blue());
                     r

@@ -12,8 +12,8 @@ params:
     default: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
 
 steps:
-  change-source-list:
-    replace: /etc/apt/source.list
+  change-sources-list:
+    replace: /etc/apt/sources.list
     with: |
       deb {BASE} {RELEASE} main restricted universe multiverse
       deb {BASE} {RELEASE}-security main restricted universe multiverse
@@ -33,5 +33,5 @@ procedures:
   - when:
       DIST: ubuntu
     steps:
+      - do: change-sources-list
       - run: sudo apt update
-      - do: change-source-list

@@ -259,6 +259,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ctrlc"
+version = "3.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c15b8ec3b5755a188c141c1f6a98e76de31b936209bf066b647979e2a84764a9"
+dependencies = [
+ "nix",
+ "winapi",
+]
+
+[[package]]
 name = "darling"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -671,6 +681,7 @@ dependencies = [
  "anyhow",
  "bat",
  "colored",
+ "ctrlc",
  "dialoguer",
  "env_logger",
  "log",
@@ -683,6 +694,18 @@ dependencies = [
  "syntect",
  "sys-info",
  "tempfile",
+]
+
+[[package]]
+name = "nix"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa9b4819da1bc61c0ea48b63b7bc8604064dd43013e7cc325df098d49cd7c18a"
+dependencies = [
+ "bitflags",
+ "cc",
+ "cfg-if",
+ "libc",
 ]
 
 [[package]]

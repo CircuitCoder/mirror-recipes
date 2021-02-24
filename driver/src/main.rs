@@ -27,6 +27,11 @@ fn main(args: Args) {
 fn inner_main(args: Args) -> anyhow::Result<()> {
     let Args { cmd, storage } = args;
 
+    ctrlc::set_handler(move || {
+        println!("{}", "".clear());
+        std::process::exit(1);
+    })?;
+
     match cmd {
         Command::Apply {
             preset,
@@ -141,8 +146,8 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
                     ProcStep::Inline(ref step) => step,
                 };
 
-                println!("{} {}{}", "Step".green(), idx + 1, step_cnt_str.black());
-                step.execute(non_interactive, !no_overwrite_backup, dry_run, &params)?;
+                println!("\n{} {}{}", "Step".green(), idx + 1, step_cnt_str.dimmed());
+                step.execute(non_interactive, !no_overwrite_backup, dry_run, &shell, &params)?;
             }
             Ok(())
         }

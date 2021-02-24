@@ -10,6 +10,7 @@ edition = "2018"
 anyhow = "1.0.38"
 bat = "0.17.1"
 colored = "2.0.0"
+ctrlc = "3.1.7"
 dialoguer = { git="https://github.com/CircuitCoder/dialoguer" }
 env_logger = "0.8.3"
 log = "0.4.14"
