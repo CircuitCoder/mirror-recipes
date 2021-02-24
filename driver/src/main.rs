@@ -7,6 +7,7 @@ mod recipe;
 use std::{collections::HashMap, fs::File, path::PathBuf};
 
 use args::*;
+use colored::Colorize;
 use preset::*;
 use recipe::*;
 
@@ -37,9 +38,11 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             shell,
         } => {
             let shell = shell.or_else(|| std::env::var_os("SHELL").map(PathBuf::from));
-            let shell = shell.ok_or_else(|| anyhow::anyhow!(
-                "Cannot determine shell path from $SHELL. Use -s to specify explicitly."
-            ))?;
+            let shell = shell.ok_or_else(|| {
+                anyhow::anyhow!(
+                    "Cannot determine shell path from $SHELL. Use -s to specify explicitly."
+                )
+            })?;
 
             let preset_path = preset.as_ref().map(|p| {
                 let mut path = storage.clone();
@@ -128,7 +131,20 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             log::debug!("{:#?}", proc);
             log::debug!("{:#?}", steps);
 
-            unimplemented!()
+            let step_cnt = proc.steps.len();
+            let step_cnt_str = format!("/{}", step_cnt);
+            for (idx, step) in proc.steps.into_iter().enumerate() {
+                let step = match step {
+                    ProcStep::Ref{ r#do: key } => steps
+                        .get(&key)
+                        .ok_or_else(|| anyhow::anyhow!("Step ref not found: {}", key))?,
+                    ProcStep::Inline(ref step) => step,
+                };
+
+                println!("{} {}{}", "Step".green(), idx + 1, step_cnt_str.black());
+                step.execute(non_interactive, !no_overwrite_backup, dry_run, &params)?;
+            }
+            Ok(())
         }
         Command::List(_) => unimplemented!(),
         Command::Show(_) => unimplemented!(),

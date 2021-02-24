@@ -66,11 +66,19 @@
               "type": "object",
               "properties": {
                 "obtained-by": { "type": "string" }
-              }
+              },
+              "required": ["obtained-by"]
             }, {
+              "type": "object",
               "properties": {
                 "default": { "type": "string" }
-              }
+              },
+              "required": ["default"]
+            }, {
+              "allOf": [
+                { "not": { "required": ["obtained-by"] }},
+                { "not": { "required": ["default"] }}
+              ]
             }]
           }]
         }

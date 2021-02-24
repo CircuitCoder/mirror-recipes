@@ -15,22 +15,23 @@ steps:
   change-source-list:
     replace: /etc/apt/source.list
     with: |
-      deb ${BASE} ${RELEASE} main restricted universe multiverse
-      deb ${BASE} ${RELEASE}-security main restricted universe multiverse
-      deb ${BASE} ${RELEASE}-backports main restricted universe multiverse
-      deb ${BASE} ${RELEASE}-updates main restricted universe multiverse
+      deb {BASE} {RELEASE} main restricted universe multiverse
+      deb {BASE} {RELEASE}-security main restricted universe multiverse
+      deb {BASE} {RELEASE}-backports main restricted universe multiverse
+      deb {BASE} {RELEASE}-updates main restricted universe multiverse
       # Enable if you want to get proposed packages
-      # deb ${BASE} ${RELEASE}-proposed main restricted universe multiverse
+      # deb {BASE} {RELEASE}-proposed main restricted universe multiverse
 
-      deb-src ${BASE} ${RELEASE} main restricted universe multiverse
-      deb-src ${BASE} ${RELEASE}-security main restricted universe multiverse
-      deb-src ${BASE} ${RELEASE}-backports main restricted universe multiverse
-      deb-src ${BASE} ${RELEASE}-updates main restricted universe multiverse
+      deb-src {BASE} {RELEASE} main restricted universe multiverse
+      deb-src {BASE} {RELEASE}-security main restricted universe multiverse
+      deb-src {BASE} {RELEASE}-backports main restricted universe multiverse
+      deb-src {BASE} {RELEASE}-updates main restricted universe multiverse
       # Enable if you want to get proposed packages
-      # deb-src ${BASE} ${RELEASE}-proposed main restricted universe multiverse
+      # deb-src {BASE} {RELEASE}-proposed main restricted universe multiverse
 
 procedures:
   - when:
       DIST: ubuntu
     steps:
       - run: sudo apt update
+      - do: change-source-list

@@ -1,5 +1,6 @@
 use std::{collections::HashMap, path::Path};
 
+use bat::PrettyPrinter;
 use colored::Colorize;
 use serde::Deserialize;
 use serde_with::serde_as;
@@ -41,13 +42,11 @@ pub struct Param {
 pub enum Step {
     Manually(#[serde(rename = "manually")] String),
 
-    #[serde(rename_all = "kebab-case")]
     Replace {
         replace: String,
         with: String,
     },
 
-    #[serde(rename_all = "kebab-case")]
     Append {
         append: String,
         with: String,
@@ -61,7 +60,9 @@ pub enum Step {
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
 pub enum ProcStep {
-    Ref(#[serde(rename = "do")] String),
+    Ref {
+        r#do: String
+    },
     Inline(Step),
 }
 
@@ -76,11 +77,29 @@ impl Step {
         &self,
         non_interactive: bool,
         default_replace_backup: bool,
+        dry_run: bool,
+        params: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         match self {
             Step::Manually(hint) => Ok(()),
-            Step::Replace { replace, with } => Self::modify_file(&replace, &with, true),
-            Step::Append { append, with } => Self::modify_file(&append, &with, true),
+            Step::Replace { replace, with } => Self::modify_file(
+                &replace,
+                &with,
+                false,
+                non_interactive,
+                default_replace_backup,
+                dry_run,
+                params,
+            ),
+            Step::Append { append, with } => Self::modify_file(
+                &append,
+                &with,
+                true,
+                non_interactive,
+                default_replace_backup,
+                dry_run,
+                params,
+            ),
             Step::Run { run, with } => {
                 // Interpolate
                 Ok(())
@@ -88,17 +107,30 @@ impl Step {
         }
     }
 
-    fn modify_file<P: AsRef<Path>>(path: P, content: &str, append: bool) -> anyhow::Result<()> {
+    fn modify_file<P: AsRef<Path>>(
+        path: P,
+        content: &str,
+        append: bool,
+        non_interactive: bool,
+        default_replace_backup: bool,
+        dry_run: bool,
+        params: &HashMap<String, String>,
+    ) -> anyhow::Result<()> {
         let path_disp = format!("{}", path.as_ref().display());
         if append {
             println!(
-                "{} {} the content:",
+                "{} {} the following:",
                 "Append to".magenta(),
                 path_disp.blue()
             )
         } else {
-            println!("{} {} with content:", "Replace".magenta(), path_disp.blue())
+            println!("{} {} with:", "Replace".magenta(), path_disp.blue())
         }
+
+        let interpolated = crate::params::expand(content, params)?;
+
+        // Ignore printed result
+        bat::PrettyPrinter::new().input_from_bytes(interpolated.as_bytes()).print().unwrap();
 
         todo!()
     }

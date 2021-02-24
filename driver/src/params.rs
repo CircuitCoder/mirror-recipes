@@ -10,6 +10,29 @@ use regex::Regex;
  * Variable expansion, etc.
  */
 
+pub fn expand_params<'a>(
+    raw: &'a HashMap<String, String>,
+) -> anyhow::Result<HashMap<&'a str, String>> {
+    let components: HashMap<&'a str, Vec<Component>> = raw
+        .iter()
+        .map(|(k, v)| (k.as_str(), to_components(v.as_str())))
+        .collect();
+
+    let sorted = topo_sort(&components)?;
+    let mut stash: HashMap<&'a str, String> = HashMap::new();
+    for key in sorted {
+        let result = join_unchecked(components.get(key).unwrap(), &stash).unwrap();
+        stash.insert(key, result);
+    }
+
+    Ok(stash)
+}
+
+pub fn expand(s: &str, params: &HashMap<String, String>) -> anyhow::Result<String> {
+    let components = to_components(s);
+    join_unchecked(&components, params)
+}
+
 enum Component<'a> {
     Raw(&'a str),
     Var(&'a str),
@@ -36,24 +59,6 @@ fn to_components<'a>(input: &'a str) -> Vec<Component<'a>> {
     }
 
     result
-}
-
-pub fn expand_params<'a>(
-    raw: &'a HashMap<String, String>,
-) -> anyhow::Result<HashMap<&'a str, String>> {
-    let components: HashMap<&'a str, Vec<Component>> = raw
-        .iter()
-        .map(|(k, v)| (k.as_str(), to_components(v.as_str().into())))
-        .collect();
-
-    let sorted = topo_sort(&components)?;
-    let mut stash: HashMap<&'a str, String> = HashMap::new();
-    for key in sorted {
-        let result = join_unchecked(components.get(key).unwrap(), &stash).unwrap();
-        stash.insert(key, result);
-    }
-
-    Ok(stash)
 }
 
 fn topo_sort<'a>(comp: &HashMap<&'a str, Vec<Component<'a>>>) -> anyhow::Result<Vec<&'a str>> {
@@ -127,14 +132,17 @@ fn topo_sort_inner<'a>(
     Ok(())
 }
 
-fn join_unchecked(
-    input: &Vec<Component>,
-    params: &HashMap<&str, String>,
-) -> anyhow::Result<String> {
+fn join_unchecked<S>(input: &Vec<Component>, params: &HashMap<S, String>) -> anyhow::Result<String>
+where
+    S: Borrow<str> + Eq + std::hash::Hash,
+{
     let mut ret = String::new();
     for comp in input.into_iter() {
         match comp {
-            Component::Raw(r) => ret.push_str(r.borrow()),
+            Component::Raw(r) => {
+                let expanded = r.replace("{{", "{").replace("}}", "}");
+                ret.push_str(&expanded);
+            }
             Component::Var(k) => {
                 let borrowed: &str = k.borrow();
                 let value = match params.get(borrowed) {
