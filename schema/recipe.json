@@ -15,10 +15,18 @@
       }, {
         "type": "object",
         "properties": {
-          "replace-file": { "type": "string" },
+          "append": { "type": "string" },
           "with": { "type": "string" }
         },
-        "required": ["replace-file", "with"],
+        "required": ["append", "with"],
+        "additionalProperties": false
+      }, {
+        "type": "object",
+        "properties": {
+          "replace": { "type": "string" },
+          "with": { "type": "string" }
+        },
+        "required": ["replace", "with"],
         "additionalProperties": false
       }, {
         "type": "object",

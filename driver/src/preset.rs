@@ -7,9 +7,9 @@ pub struct Preset {
 }
 
 pub struct ExecEnv {
-  pub os: String,
-  pub arch: String,
-  pub dist: String,
+    pub os: String,
+    pub arch: String,
+    pub dist: String,
 }
 
 pub fn env_detect() -> ExecEnv {

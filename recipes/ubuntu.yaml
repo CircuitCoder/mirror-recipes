@@ -13,7 +13,7 @@ params:
 
 steps:
   change-source-list:
-    replace-file: /etc/apt/source.list
+    replace: /etc/apt/source.list
     with: |
       deb ${BASE} ${RELEASE} main restricted universe multiverse
       deb ${BASE} ${RELEASE}-security main restricted universe multiverse

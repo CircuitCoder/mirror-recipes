@@ -2,6 +2,7 @@ mod args;
 mod exec;
 mod preset;
 mod recipe;
+mod params;
 
 use std::{collections::HashMap, fs::File, path::PathBuf};
 
@@ -74,6 +75,9 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
 
             params_stash.extend(cli_params.into_iter());
 
+            // Expand all params provided by the stash
+            let mut params_expanded = params::expand_params(&params_stash)?;
+
             let Recipe {
                 params: param_spec,
                 steps,
@@ -84,7 +88,7 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             let mut invalid_params = Vec::new();
             let mut params = HashMap::new();
             for (key, spec) in param_spec {
-                let cli_value = params_stash.remove(&key);
+                let cli_value = params_expanded.remove(key.as_str());
 
                 if non_interactive {
                     match spec.get_non_interactive(cli_value, &shell)? {
@@ -102,7 +106,10 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             }
 
             if invalid_params.len() > 0 {
-                return Err(anyhow::anyhow!("Invalid parameters: {}", invalid_params.join(", ")));
+                return Err(anyhow::anyhow!(
+                    "Invalid parameters: {}",
+                    invalid_params.join(", ")
+                ));
             }
 
             // Find matching proc

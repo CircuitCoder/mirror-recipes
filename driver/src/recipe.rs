@@ -42,8 +42,14 @@ pub enum Step {
     Manually(#[serde(rename = "manually")] String),
 
     #[serde(rename_all = "kebab-case")]
-    ReplaceFile {
-        replace_file: String,
+    Replace {
+        replace: String,
+        with: String,
+    },
+
+    #[serde(rename_all = "kebab-case")]
+    Append {
+        append: String,
         with: String,
     },
 
@@ -66,16 +72,35 @@ pub struct Proc {
 }
 
 impl Step {
-    pub fn execute(&self) {
+    pub fn execute(
+        &self,
+        non_interactive: bool,
+        default_replace_backup: bool,
+    ) -> anyhow::Result<()> {
         match self {
-            Step::Manually(hint) => {
-                // println!("You are ")
-            }
-            Step::ReplaceFile { replace_file, with } => {}
+            Step::Manually(hint) => Ok(()),
+            Step::Replace { replace, with } => Self::modify_file(&replace, &with, true),
+            Step::Append { append, with } => Self::modify_file(&append, &with, true),
             Step::Run { run, with } => {
                 // Interpolate
+                Ok(())
             }
         }
+    }
+
+    fn modify_file<P: AsRef<Path>>(path: P, content: &str, append: bool) -> anyhow::Result<()> {
+        let path_disp = format!("{}", path.as_ref().display());
+        if append {
+            println!(
+                "{} {} the content:",
+                "Append to".magenta(),
+                path_disp.blue()
+            )
+        } else {
+            println!("{} {} with content:", "Replace".magenta(), path_disp.blue())
+        }
+
+        todo!()
     }
 }
 
@@ -119,7 +144,7 @@ impl Param {
             Some(DefaultValue::ObtainedBy(s)) => {
                 let result = crate::exec::exec_blocking(&shell, &s)?;
                 Ok(Some(result))
-            },
+            }
             Some(DefaultValue::Default(v)) => Ok(Some(v)),
         }
     }
@@ -142,7 +167,7 @@ impl Param {
             Some(DefaultValue::ObtainedBy(s)) => {
                 options.push(ParamSelect::Execute(s));
             }
-            None => {},
+            None => {}
         };
 
         if let Some(PossibleValue::Enum(ref vals)) = self.possible_value {
@@ -155,12 +180,13 @@ impl Param {
             options.push(ParamSelect::Input(None));
         }
 
-        let items: Vec<_> = options.iter().map(|o| {
-            match o {
+        let items: Vec<_> = options
+            .iter()
+            .map(|o| match o {
                 ParamSelect::Execute(s) => {
                     let fmt = fmt_shell(s.as_str());
                     format!("{} {}", "Execute".magenta(), fmt.as_str().clear())
-                },
+                }
                 ParamSelect::Value(val) => {
                     format!("\"{}\"", val.blue())
                 }
@@ -170,14 +196,17 @@ impl Param {
                 ParamSelect::Input(None) => {
                     format!("{}", "Input manually".magenta())
                 }
-            }
-        }).collect();
+            })
+            .collect();
 
         let prompt = format!("{} {}", "Parameter".green(), name);
 
         loop {
             // Render options
-            let result = dialoguer::Select::new().with_prompt(&prompt).items(&items).interact()?;
+            let result = dialoguer::Select::new()
+                .with_prompt(&prompt)
+                .items(&items)
+                .interact()?;
             let result = &options[result];
             let result = match result {
                 ParamSelect::Execute(s) => {
@@ -212,16 +241,14 @@ trait ValidateExt {
 
 impl ValidateExt for Option<PossibleValue> {
     fn validate(&self, val: &str) -> bool {
-        self.as_ref()
-            .map(|pv| pv.validate(val))
-            .unwrap_or(true)
+        self.as_ref().map(|pv| pv.validate(val)).unwrap_or(true)
     }
 }
 
 fn fmt_shell(input: &str) -> String {
     use syntect::easy::HighlightLines;
+    use syntect::highlighting::{Style, ThemeSet};
     use syntect::parsing::SyntaxSet;
-    use syntect::highlighting::{ThemeSet, Style};
     use syntect::util::{as_24_bit_terminal_escaped, LinesWithEndings};
 
     // Load these once at the start of your program

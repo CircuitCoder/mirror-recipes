@@ -31,3 +31,4 @@ This is a WIP effort. Some important design descisions are still to be made:
 - Embedding procedures! (It's getting close to being turing-complete)
 - Well-known script interpreter names? (Optionally for highlighting code chunks)
 - An POC driver is written in Rust, so we get CLI options / readline / highlighting easily. How to distribute statically-linked executables to multiple OSes?
+- Recursive variable expansion?

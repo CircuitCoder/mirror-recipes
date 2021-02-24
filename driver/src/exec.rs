@@ -8,7 +8,9 @@ pub fn exec_blocking<P: AsRef<Path>>(shell: P, script: &str) -> anyhow::Result<S
 
     let path = file.into_temp_path();
 
-    let output = Command::new(shell.as_ref().as_os_str()).arg(path.as_os_str()).output()?;
+    let output = Command::new(shell.as_ref().as_os_str())
+        .arg(path.as_os_str())
+        .output()?;
     if !output.status.success() {
         return Err(anyhow::anyhow!(
             "Command failed with status {}",
