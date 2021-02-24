@@ -1,5 +1,5 @@
 use std::{
-    borrow::{Borrow, Cow},
+    borrow::Borrow,
     collections::{HashMap, HashSet},
 };
 
@@ -16,7 +16,7 @@ enum Component<'a> {
 }
 
 fn to_components<'a>(input: &'a str) -> Vec<Component<'a>> {
-    let regex = Regex::new("{ *([A-Z0-9]+) *}").unwrap();
+    let regex = Regex::new("\\{ *([A-Z0-9_]+) *\\}").unwrap();
     let mut result = Vec::new();
     let mut last = 0;
     for captures in regex.captures_iter(input) {

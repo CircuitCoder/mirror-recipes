@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 pub struct Preset {
+    pub shared: Option<HashMap<String, String>>,
     pub presets: HashMap<String, HashMap<String, String>>,
 }
 

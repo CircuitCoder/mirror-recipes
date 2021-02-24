@@ -64,8 +64,15 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
 
             let mut params_stash: HashMap<String, String> = preset::env_detect().into();
 
-            if let Some(mut pf) = preset_file {
-                if let Some(inner) = pf.presets.remove(&recipe) {
+            if let Some(Preset {
+                mut presets,
+                shared,
+            }) = preset_file {
+                if let Some(inner) = shared {
+                    params_stash.extend(inner);
+                }
+
+                if let Some(inner) = presets.remove(&recipe) {
                     params_stash.extend(inner.into_iter());
                 } else {
                     log::error!("Preset `{}` is not applicable to recipe `{}`. Use the subcommand `show preset` to show applicable recipes.", preset.unwrap(), recipe);
@@ -116,6 +123,7 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             let proc = procedures.into_iter().find(|p| p.test(&params));
             let proc = proc.ok_or(anyhow::anyhow!("No matching procedure found"))?;
 
+            log::debug!("{:#?}", params);
             log::debug!("{:#?}", proc);
             log::debug!("{:#?}", steps);
 

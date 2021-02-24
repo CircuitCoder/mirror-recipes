@@ -1,6 +1,8 @@
 # Well-known repositories for TUNA
 homepage: https://mirrors.tuna.tsinghua.edu.cn
 fullname: Tsinghua University Open Source Mirrors
+shared:
+  SITE_BASE: https://mirrors.tuna.tsinghua.edu.cn
 presets:
   ubuntu:
-    BASE: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
+    BASE: "{SITE_BASE}/ubuntu"

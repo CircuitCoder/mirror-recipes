@@ -6,6 +6,12 @@
   "properties": {
     "fullname": { "type": "string" },
     "homepage": { "type": "string" },
+    "shared": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z_]+[A-Z0-9_]*$": { "type": "string" }
+      }
+    },
     "presets": {
       "type": "object",
       "patternProperties": {
