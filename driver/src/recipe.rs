@@ -140,6 +140,7 @@ impl Step {
         let formatted_backup_file = format!("{}", backup_file.display());
 
         loop {
+            // TODO: check if already the same
             let target_exists = path.as_ref().exists();
             let backup_exists = backup_file.exists();
             if target_exists && backup_exists {
@@ -173,7 +174,6 @@ impl Step {
             } else {
                 "Y/N/S/C"
             };
-
 
             let action = if non_interactive {
                 let act = if target_exists && backup_exists {
@@ -277,7 +277,7 @@ impl Param {
             None => Ok(None),
             Some(DefaultValue::ObtainedBy(s)) => {
                 let result = crate::exec::exec_blocking(&shell, Some(&s))?;
-                Ok(Some(result))
+                Ok(Some(result.trim().to_owned()))
             }
             Some(DefaultValue::Default(v)) => Ok(Some(v)),
         }
