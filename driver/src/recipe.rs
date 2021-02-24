@@ -174,28 +174,39 @@ impl Step {
                 "Y/N/S/C"
             };
 
-            let input = dialoguer::Input::new()
-                .with_prompt(prompt)
-                .validate_with(|input: &String| -> Result<(), &str> {
-                    if input.len() != 1 {
-                        Err("Please input only one character")
-                    } else {
-                        let c = input.chars().next().unwrap();
-                        let c = c.to_ascii_uppercase();
-                        if target_exists && backup_exists && (c == 'K' || c == 'O') {
-                            Ok(())
-                        } else if !(target_exists && backup_exists) && c == 'Y' {
-                            Ok(())
-                        } else if c == 'S' || c == 'C' || c == 'N' {
-                            Ok(())
-                        } else {
-                            Err("Please choose one of the options")
-                        }
-                    }
-                })
-                .interact()?;
 
-            let action = input.chars().next().unwrap().to_ascii_uppercase();
+            let action = if non_interactive {
+                let act = if target_exists && backup_exists {
+                    if default_replace_backup { "O" } else { "K" }
+                } else { "Y" };
+
+                println!("Choosing {}", act.magenta());
+                act.chars().next().unwrap()
+            } else {
+                let input = dialoguer::Input::new()
+                    .with_prompt(prompt)
+                    .validate_with(|input: &String| -> Result<(), &str> {
+                        if input.len() != 1 {
+                            Err("Please input only one character")
+                        } else {
+                            let c = input.chars().next().unwrap();
+                            let c = c.to_ascii_uppercase();
+                            if target_exists && backup_exists && (c == 'K' || c == 'O') {
+                                Ok(())
+                            } else if !(target_exists && backup_exists) && c == 'Y' {
+                                Ok(())
+                            } else if c == 'S' || c == 'C' || c == 'N' {
+                                Ok(())
+                            } else {
+                                Err("Please choose one of the options")
+                            }
+                        }
+                    })
+                    .interact()?;
+
+                input.chars().next().unwrap().to_ascii_uppercase()
+            };
+
             match action {
                 'C' => break Ok(()),
                 'N' => break Err(anyhow::anyhow!("User canceled")),
@@ -203,6 +214,10 @@ impl Step {
                     crate::exec::exec_blocking_shell(&shell)?;
                 }
                 'Y' | 'O' | 'K' => {
+                    if dry_run {
+                        break Ok(());
+                    }
+
                     if target_exists && action != 'K' {
                         std::fs::copy(&path, &backup_file)?;
                     }
