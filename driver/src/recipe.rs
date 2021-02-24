@@ -1,7 +1,12 @@
-use std::{collections::HashMap, ffi::{OsStr, OsString}, io::Write, path::Path};
 use colored::Colorize;
 use serde::Deserialize;
 use serde_with::serde_as;
+use std::{
+    collections::HashMap,
+    ffi::{OsStr, OsString},
+    io::Write,
+    path::Path,
+};
 
 #[derive(Deserialize, Debug)]
 pub struct Recipe {
@@ -40,27 +45,16 @@ pub struct Param {
 pub enum Step {
     Manually(#[serde(rename = "manually")] String),
 
-    Replace {
-        replace: String,
-        with: String,
-    },
+    Replace { replace: String, with: String },
 
-    Append {
-        append: String,
-        with: String,
-    },
+    Append { append: String, with: String },
 
-    Run {
-        run: String,
-        with: Option<String>,
-    },
+    Run { run: String, with: Option<String> },
 }
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
 pub enum ProcStep {
-    Ref {
-        r#do: String
-    },
+    Ref { r#do: String },
     Inline(Step),
 }
 
@@ -136,7 +130,8 @@ impl Step {
             .input_from_bytes(interpolated.as_bytes())
             .line_numbers(true)
             .grid(true)
-            .print().unwrap();
+            .print()
+            .unwrap();
 
         // Detect backup file
         let mut backup_file = path.as_ref().to_path_buf();
@@ -153,12 +148,22 @@ impl Step {
             let target_exists = path.as_ref().exists();
             let backup_exists = backup_file.exists();
             if target_exists && backup_exists {
-                println!("Backup file at {} already exists. Choose one action:", formatted_backup_file.blue());
-                println!("{}: Keep current file at {}", "K".magenta(), formatted_backup_file.blue());
+                println!(
+                    "Backup file at {} already exists. Choose one action:",
+                    formatted_backup_file.blue()
+                );
+                println!(
+                    "{}: Keep current file at {}",
+                    "K".magenta(),
+                    formatted_backup_file.blue()
+                );
                 println!("{}: Overwrite", "O".magenta());
             } else {
                 if target_exists {
-                    println!("Original file will be moved to {}. Choose one action:", formatted_backup_file.blue());
+                    println!(
+                        "Original file will be moved to {}. Choose one action:",
+                        formatted_backup_file.blue()
+                    );
                 } else {
                     println!("A new file will be created. Choose one action:");
                 }
@@ -175,24 +180,33 @@ impl Step {
             };
 
             let input = dialoguer::Input::new()
-                .with_prompt(prompt).validate_with(|input: &String| -> Result<(), &str> {
+                .with_prompt(prompt)
+                .validate_with(|input: &String| -> Result<(), &str> {
                     if input.len() != 1 {
                         Err("Please input only one character")
                     } else {
                         let c = input.chars().next().unwrap();
                         let c = c.to_ascii_uppercase();
-                        if target_exists && backup_exists && (c == 'K' || c == 'O') { Ok(()) }
-                        else if !(target_exists && backup_exists) && c == 'Y' { Ok(()) }
-                        else if c == 'S' || c == 'C' || c == 'N' { Ok(()) }
-                        else { Err("Please choose one of the options") }
+                        if target_exists && backup_exists && (c == 'K' || c == 'O') {
+                            Ok(())
+                        } else if !(target_exists && backup_exists) && c == 'Y' {
+                            Ok(())
+                        } else if c == 'S' || c == 'C' || c == 'N' {
+                            Ok(())
+                        } else {
+                            Err("Please choose one of the options")
+                        }
                     }
-                }).interact()?;
+                })
+                .interact()?;
 
             let action = input.chars().next().unwrap().to_ascii_uppercase();
             match action {
                 'C' => break Ok(()),
                 'N' => break Err(anyhow::anyhow!("User canceled")),
-                'S' => { crate::exec::exec_blocking_shell(&shell)?; },
+                'S' => {
+                    crate::exec::exec_blocking_shell(&shell)?;
+                }
                 'Y' | 'O' => {
                     if target_exists {
                         std::fs::rename(&path, &backup_file)?;
@@ -202,14 +216,14 @@ impl Step {
                     let mut f = std::fs::File::create(&path)?;
                     f.write_all(interpolated.as_bytes())?;
 
-                    break Ok(())
-                },
+                    break Ok(());
+                }
                 'K' => {
                     let mut f = std::fs::File::create(&path)?;
                     f.write_all(interpolated.as_bytes())?;
 
-                    break Ok(())
-                },
+                    break Ok(());
+                }
                 _ => panic!("Unexpected input {}", action),
             }
         }

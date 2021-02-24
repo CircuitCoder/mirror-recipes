@@ -140,14 +140,20 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             let step_cnt_str = format!("/{}", step_cnt);
             for (idx, step) in proc.steps.into_iter().enumerate() {
                 let step = match step {
-                    ProcStep::Ref{ r#do: key } => steps
+                    ProcStep::Ref { r#do: key } => steps
                         .get(&key)
                         .ok_or_else(|| anyhow::anyhow!("Step ref not found: {}", key))?,
                     ProcStep::Inline(ref step) => step,
                 };
 
                 println!("\n{} {}{}", "Step".green(), idx + 1, step_cnt_str.dimmed());
-                step.execute(non_interactive, !no_overwrite_backup, dry_run, &shell, &params)?;
+                step.execute(
+                    non_interactive,
+                    !no_overwrite_backup,
+                    dry_run,
+                    &shell,
+                    &params,
+                )?;
             }
             Ok(())
         }
