@@ -69,7 +69,15 @@ impl Step {
         params: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         match self {
-            Step::Manually(hint) => Ok(()),
+            Step::Manually(hint) => {
+                if non_interactive {
+                    println!("{}: Manual steps cannot be executed in non-interactive mode.", "Error".red());
+                    println!("You may follow the hint after the script exists, and then use the `--from` option to skip this step and previous steps.");
+                    return Err(anyhow::anyhow!("Manual step in non-interactive mode"));
+                }
+
+                todo!()
+            },
             Step::Replace { replace, with } => Self::modify_file(
                 &replace,
                 &with,

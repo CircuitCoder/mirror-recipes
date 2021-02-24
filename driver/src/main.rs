@@ -41,6 +41,7 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             no_overwrite_backup,
             dry_run,
             shell,
+            from,
         } => {
             let shell = shell.or_else(|| std::env::var_os("SHELL").map(PathBuf::from));
             let shell = shell.ok_or_else(|| {
@@ -137,8 +138,15 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             log::debug!("{:#?}", steps);
 
             let step_cnt = proc.steps.len();
+            if from > step_cnt {
+                println!("{}: --from option value is out of range, as the procedure only have {} steps.", "Error".red(), step_cnt);
+                return Err(anyhow::anyhow!("Invalid from argument"));
+            }
+
             let step_cnt_str = format!("/{}", step_cnt);
             for (idx, step) in proc.steps.into_iter().enumerate() {
+                if idx < from - 1 { continue; }
+
                 let step = match step {
                     ProcStep::Ref { r#do: key } => steps
                         .get(&key)
