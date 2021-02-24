@@ -27,6 +27,6 @@ pub fn exec_blocking<P: AsRef<Path>>(shell: P, script: Option<&str>) -> anyhow::
 }
 
 pub fn exec_blocking_shell<P: AsRef<Path>>(shell: P) -> anyhow::Result<bool> {
-    let mut status = Command::new(shell.as_ref().as_os_str()).status()?;
+    let status = Command::new(shell.as_ref().as_os_str()).status()?;
     Ok(status.success())
 }

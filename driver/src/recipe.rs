@@ -1,12 +1,7 @@
 use colored::Colorize;
 use serde::Deserialize;
 use serde_with::serde_as;
-use std::{
-    collections::HashMap,
-    ffi::{OsStr, OsString},
-    io::Write,
-    path::Path,
-};
+use std::{collections::HashMap, ffi::{OsStr, OsString}, fs::OpenOptions, io::Write, path::Path};
 
 #[derive(Deserialize, Debug)]
 pub struct Recipe {
@@ -207,19 +202,17 @@ impl Step {
                 'S' => {
                     crate::exec::exec_blocking_shell(&shell)?;
                 }
-                'Y' | 'O' => {
-                    if target_exists {
-                        std::fs::rename(&path, &backup_file)?;
+                'Y' | 'O' | 'K' => {
+                    if target_exists && action != 'K' {
+                        std::fs::copy(&path, &backup_file)?;
                     }
 
                     // TODO: restore umask
-                    let mut f = std::fs::File::create(&path)?;
-                    f.write_all(interpolated.as_bytes())?;
-
-                    break Ok(());
-                }
-                'K' => {
-                    let mut f = std::fs::File::create(&path)?;
+                    let mut f = if append {
+                        OpenOptions::new().append(true).create(true).open(&path)?
+                    } else {
+                        std::fs::File::create(&path)?
+                    };
                     f.write_all(interpolated.as_bytes())?;
 
                     break Ok(());
