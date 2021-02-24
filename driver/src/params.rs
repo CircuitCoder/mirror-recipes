@@ -38,7 +38,9 @@ fn to_components<'a>(input: &'a str) -> Vec<Component<'a>> {
     result
 }
 
-pub fn expand_params<'a>(raw: &'a HashMap<String, String>) -> anyhow::Result<HashMap<&'a str, String>> {
+pub fn expand_params<'a>(
+    raw: &'a HashMap<String, String>,
+) -> anyhow::Result<HashMap<&'a str, String>> {
     let components: HashMap<&'a str, Vec<Component>> = raw
         .iter()
         .map(|(k, v)| (k.as_str(), to_components(v.as_str().into())))

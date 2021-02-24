@@ -1,8 +1,8 @@
 mod args;
 mod exec;
+mod params;
 mod preset;
 mod recipe;
-mod params;
 
 use std::{collections::HashMap, fs::File, path::PathBuf};
 
@@ -36,8 +36,8 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             dry_run,
             shell,
         } => {
-            let shell = shell.or(std::env::var_os("SHELL").map(PathBuf::from));
-            let shell = shell.ok_or(anyhow::anyhow!(
+            let shell = shell.or_else(|| std::env::var_os("SHELL").map(PathBuf::from));
+            let shell = shell.ok_or_else(|| anyhow::anyhow!(
                 "Cannot determine shell path from $SHELL. Use -s to specify explicitly."
             ))?;
 
@@ -67,7 +67,8 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
             if let Some(Preset {
                 mut presets,
                 shared,
-            }) = preset_file {
+            }) = preset_file
+            {
                 if let Some(inner) = shared {
                     params_stash.extend(inner);
                 }
@@ -112,7 +113,7 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
                 }
             }
 
-            if invalid_params.len() > 0 {
+            if !invalid_params.is_empty() {
                 return Err(anyhow::anyhow!(
                     "Invalid parameters: {}",
                     invalid_params.join(", ")
@@ -121,7 +122,7 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
 
             // Find matching proc
             let proc = procedures.into_iter().find(|p| p.test(&params));
-            let proc = proc.ok_or(anyhow::anyhow!("No matching procedure found"))?;
+            let proc = proc.ok_or_else(|| anyhow::anyhow!("No matching procedure found"))?;
 
             log::debug!("{:#?}", params);
             log::debug!("{:#?}", proc);

@@ -267,5 +267,5 @@ fn fmt_shell(input: &str) -> String {
         collected += &escaped;
     }
 
-    collected.split("\n").next().unwrap().to_string()
+    collected.split('\n').next().unwrap().to_string()
 }
