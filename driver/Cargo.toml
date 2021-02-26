@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0.38"
-bat = "0.17.1"
+bat = { version="0.17.1", default-features=false }
 colored = "2.0.0"
 ctrlc = "3.1.7"
 dialoguer = { git="https://github.com/CircuitCoder/dialoguer" }
@@ -24,3 +24,6 @@ syntect = "4.5.0"
 sys-info = "0.8.0"
 tempfile = "3.2.0"
 which = "4.0.2"
+
+[profile.release]
+lto = true
