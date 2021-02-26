@@ -46,7 +46,7 @@ pub enum Command {
         /// Skip steps in the beginning. e.g. --from 2 will skip the first step.
         /// Useful if the script failed previously, and the problem have been fixed manually
         /// Note tha this argument is 1-based
-        #[structopt(long, default_value="1")]
+        #[structopt(long, default_value = "1")]
         from: usize,
     },
 

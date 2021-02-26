@@ -1,7 +1,14 @@
 use colored::Colorize;
 use serde::Deserialize;
 use serde_with::serde_as;
-use std::{collections::HashMap, ffi::{OsStr, OsString}, fs::OpenOptions, io::Write, path::Path};
+use std::{
+    collections::HashMap,
+    ffi::{OsStr, OsString},
+    fs::OpenOptions,
+    io::Write,
+    path::Path,
+};
+use tempfile::TempPath;
 
 #[derive(Deserialize, Debug)]
 pub struct Recipe {
@@ -71,13 +78,16 @@ impl Step {
         match self {
             Step::Manually(hint) => {
                 if non_interactive {
-                    println!("{}: Manual steps cannot be executed in non-interactive mode.", "Error".red());
+                    println!(
+                        "{}: Manual steps cannot be executed in non-interactive mode.",
+                        "Error".red()
+                    );
                     println!("You may follow the hint after the script exists, and then use the `--from` option to skip this step and previous steps.");
                     return Err(anyhow::anyhow!("Manual step in non-interactive mode"));
                 }
 
                 todo!()
-            },
+            }
             Step::Replace { replace, with } => Self::modify_file(
                 &replace,
                 &with,
@@ -116,25 +126,8 @@ impl Step {
         params: &HashMap<String, String>,
     ) -> anyhow::Result<()> {
         let path_disp = format!("{}", path.as_ref().display());
-        if append {
-            println!(
-                "{} {} the following:",
-                "Append to".magenta(),
-                path_disp.blue()
-            )
-        } else {
-            println!("{} {} with:", "Replace".magenta(), path_disp.blue())
-        }
 
-        let interpolated = crate::params::expand(content, params)?;
-
-        // Ignore printed result
-        bat::PrettyPrinter::new()
-            .input_from_bytes(interpolated.as_bytes())
-            .line_numbers(true)
-            .grid(true)
-            .print()
-            .unwrap();
+        let mut interpolated = crate::params::expand(content, params)?;
 
         // Detect backup file
         let mut backup_file = path.as_ref().to_path_buf();
@@ -148,9 +141,28 @@ impl Step {
         let formatted_backup_file = format!("{}", backup_file.display());
 
         loop {
+            if append {
+                println!(
+                    "{} {} the following:",
+                    "Append to".magenta(),
+                    path_disp.blue()
+                )
+            } else {
+                println!("{} {} with:", "Replace".magenta(), path_disp.blue())
+            }
+
+            // Ignore printed result
+            bat::PrettyPrinter::new()
+                .input_from_bytes(interpolated.as_bytes())
+                .line_numbers(true)
+                .grid(true)
+                .print()
+                .unwrap();
+
             // TODO: check if already the same
             let target_exists = path.as_ref().exists();
             let backup_exists = backup_file.exists();
+
             if target_exists && backup_exists {
                 println!(
                     "Backup file at {} already exists. Choose one action:",
@@ -174,7 +186,7 @@ impl Step {
                 println!("{}: Confirm", "Y".magenta());
             }
             println!("{}: Cancel and stop the recipe now", "N".magenta());
-            println!("{}: Spin up a shell to examine", "S".magenta());
+            println!("{}: Spin up a shell to examine\n   The content above will be available in a temporary file. Edits will be reflected.", "S".magenta());
             println!("{}: Do nothing and continue", "C".magenta());
 
             let prompt = if target_exists && backup_exists {
@@ -185,8 +197,14 @@ impl Step {
 
             let action = if non_interactive {
                 let act = if target_exists && backup_exists {
-                    if default_replace_backup { "O" } else { "K" }
-                } else { "Y" };
+                    if default_replace_backup {
+                        "O"
+                    } else {
+                        "K"
+                    }
+                } else {
+                    "Y"
+                };
 
                 println!("Choosing {}", act.magenta());
                 act.chars().next().unwrap()
@@ -219,7 +237,25 @@ impl Step {
                 'C' => break Ok(()),
                 'N' => break Err(anyhow::anyhow!("User canceled")),
                 'S' => {
+                    let mut file = tempfile::NamedTempFile::new()?;
+                    file.write_all(interpolated.as_bytes())?;
+
+                    let path = file.into_temp_path();
+                    let path_disp = format!("{}", path.display());
+                    println!("Content available at {}", path_disp.blue());
+
                     crate::exec::exec_blocking_shell(&shell)?;
+
+                    let opened = std::fs::read_to_string(path);
+                    if let Ok(inner) = opened {
+                        interpolated = inner;
+                    } else {
+                        println!(
+                            "{}: {} is not readable anymore.",
+                            "Warning".yellow(),
+                            path_disp.blue()
+                        );
+                    }
                 }
                 'Y' | 'O' | 'K' => {
                     if dry_run {
