@@ -3,12 +3,11 @@ use serde::Deserialize;
 use serde_with::serde_as;
 use std::{
     collections::HashMap,
-    ffi::{OsStr, OsString},
+    ffi::OsString,
     fs::OpenOptions,
     io::Write,
-    path::Path,
+    path::{Path, PathBuf},
 };
-use tempfile::TempPath;
 
 #[derive(Deserialize, Debug)]
 pub struct Recipe {
@@ -86,7 +85,46 @@ impl Step {
                     return Err(anyhow::anyhow!("Manual step in non-interactive mode"));
                 }
 
-                todo!()
+                println!("{} do the following:", "Manually".magenta());
+                for line in hint.trim().lines() {
+                    println!("> {}", line);
+                }
+
+                loop {
+                    println!("{}: Spin up a shell", "S".magenta());
+                    println!("{}: Cancel and stop the recipe now", "N".magenta());
+                    println!("{}: Do nothing and continue", "C".magenta());
+
+                    let input = dialoguer::Input::new()
+                        .with_prompt("S/N/C")
+                        .validate_with(|input: &String| -> Result<(), &str> {
+                            if input.len() != 1 {
+                                Err("Please input only one character")
+                            } else {
+                                let c = input.chars().next().unwrap();
+                                let c = c.to_ascii_uppercase();
+                                if c == 'S' || c == 'C' || c == 'N' {
+                                    Ok(())
+                                } else {
+                                    Err("Please choose one of the options")
+                                }
+                            }
+                        })
+                        .interact()?;
+
+                    let action = input.chars().next().unwrap().to_ascii_uppercase();
+
+                    match action {
+                        'S' => {
+                            crate::exec::exec_blocking_pipe(&shell, None)?;
+                        }
+                        'C' => break Ok(()),
+                        'N' => break Err(anyhow::anyhow!("User canceled")),
+                        _ => unreachable!(),
+                    }
+
+                    println!("If you are done, select {}", "C".magenta());
+                }
             }
             Step::Replace { replace, with } => Self::modify_file(
                 &replace,
@@ -110,7 +148,128 @@ impl Step {
             ),
             Step::Run { run, with } => {
                 // Interpolate
-                Ok(())
+                let mut interpolated = crate::params::expand(run, params)?;
+
+                loop {
+                    println!("{}:", "Running".magenta());
+
+                    bat::PrettyPrinter::new()
+                        .input_from_bytes(interpolated.as_bytes())
+                        .line_numbers(true)
+                        .language(with.as_ref().map_or("bash", |inner| inner.as_str()))
+                        .grid(true)
+                        .print()
+                        .unwrap();
+
+                    if let Some(w) = with.as_ref() {
+                        println!("{}: Run with {}", "Y".magenta(), w.yellow());
+                    } else {
+                        println!("{}: Run with current shell", "Y".magenta());
+                    }
+                    println!("{}: Run the script with custom interpreter", "I".magenta());
+                    println!("{}: Cancel and stop the recipe now", "N".magenta());
+                    println!("{}: Spin up a shell to examine\n   The content above will be available in a temporary file. Edits will be reflected.", "S".magenta());
+                    println!("{}: Do nothing and continue", "C".magenta());
+
+                    let action = if non_interactive {
+                        let act = "Y";
+                        println!("Choosing {}", act.magenta());
+                        act.chars().next().unwrap()
+                    } else {
+                        let prompt = "Y/I/N/S/C";
+                        let input = dialoguer::Input::new()
+                            .with_prompt(prompt)
+                            .validate_with(|input: &String| -> Result<(), &str> {
+                                if input.len() != 1 {
+                                    Err("Please input only one character")
+                                } else {
+                                    let c = input.chars().next().unwrap();
+                                    let c = c.to_ascii_uppercase();
+                                    if c == 'Y' || c == 'I' || c == 'S' || c == 'C' || c == 'N' {
+                                        Ok(())
+                                    } else {
+                                        Err("Please choose one of the options")
+                                    }
+                                }
+                            })
+                            .interact()?;
+
+                        input.chars().next().unwrap().to_ascii_uppercase()
+                    };
+                    match action {
+                        'C' => break Ok(()),
+                        'N' => break Err(anyhow::anyhow!("User canceled")),
+                        'S' => {
+                            // TODO: suffix
+                            let mut file = tempfile::NamedTempFile::new()?;
+                            file.write_all(interpolated.as_bytes())?;
+
+                            let path = file.into_temp_path();
+                            let path_disp = format!("{}", path.display());
+                            println!("Script available at {}", path_disp.blue());
+
+                            crate::exec::exec_blocking_pipe(&shell, None)?;
+
+                            let opened = std::fs::read_to_string(path);
+                            if let Ok(inner) = opened {
+                                interpolated = inner;
+                            } else {
+                                println!(
+                                    "{}: {} is not readable anymore.",
+                                    "Warning".yellow(),
+                                    path_disp.blue()
+                                );
+                            }
+                        }
+                        'Y' | 'I' => {
+                            if dry_run {
+                                break Ok(());
+                            }
+
+                            let interpreter = if action == 'I' {
+                                let mut input = dialoguer::Input::new();
+                                input.with_prompt("Using");
+                                if let Some(inner) = with {
+                                    input.default(inner.clone()).show_default(true);
+                                }
+                                let result = input.interact()?;
+
+                                if result == "" {
+                                    None
+                                } else {
+                                    Some(result)
+                                }
+                            } else {
+                                with.clone()
+                            };
+
+                            // Lookup
+                            let buf: PathBuf;
+                            let lookup: &dyn AsRef<Path> = if let Some(ref int) = interpreter {
+                                match which::which(int) {
+                                    Err(_) => {
+                                        println!("{}: Interpreter {} not found in PATH or not executable", "Error".red(), int.blue());
+                                        continue;
+                                    }
+                                    Ok(p) => {
+                                        buf = PathBuf::from(p);
+                                        &buf
+                                    }
+                                }
+                            } else {
+                                &shell
+                            };
+
+                            let path_disp = format!("{}", lookup.as_ref().display());
+                            println!("{} {}", "Interpreter found at:".dimmed(), path_disp.blue());
+
+                            crate::exec::exec_blocking_pipe(lookup, Some(&interpolated))?;
+
+                            break Ok(());
+                        }
+                        _ => panic!("Unexpected input {}", action),
+                    }
+                }
             }
         }
     }
@@ -244,7 +403,7 @@ impl Step {
                     let path_disp = format!("{}", path.display());
                     println!("Content available at {}", path_disp.blue());
 
-                    crate::exec::exec_blocking_shell(&shell)?;
+                    crate::exec::exec_blocking_pipe(&shell, None)?;
 
                     let opened = std::fs::read_to_string(path);
                     if let Ok(inner) = opened {
@@ -320,7 +479,7 @@ impl Param {
         match self.default {
             None => Ok(None),
             Some(DefaultValue::ObtainedBy(s)) => {
-                let result = crate::exec::exec_blocking(&shell, Some(&s))?;
+                let result = crate::exec::exec_blocking_output(&shell, Some(&s))?;
                 Ok(Some(result.trim().to_owned()))
             }
             Some(DefaultValue::Default(v)) => Ok(Some(v)),
@@ -388,9 +547,9 @@ impl Param {
             let result = &options[result];
             let result = match result {
                 ParamSelect::Execute(s) => {
-                    let r = crate::exec::exec_blocking(&shell, Some(&s))?;
+                    let r = crate::exec::exec_blocking_output(&shell, Some(&s))?;
                     let r = r.trim().to_string();
-                    println!("Execution result: \"{}\"", r.blue());
+                    println!("{} \"{}\"", "Execution result:".clear().dimmed(), r.blue());
                     r
                 }
                 ParamSelect::Value(v) => v.to_string(),

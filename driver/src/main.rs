@@ -169,6 +169,8 @@ fn inner_main(args: Args) -> anyhow::Result<()> {
                     &params,
                 )?;
             }
+
+            println!("{}: {} has been successfully applied.", "Done".green(), recipe.yellow());
             Ok(())
         }
         Command::List(_) => unimplemented!(),
