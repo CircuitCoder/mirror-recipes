@@ -1,0 +1,1 @@
+{"version":3,"sources":["webpack:///./routes/NotFound.tsx"],"names":["NotFound"],"mappings":"2FAAA,uBAQeA,UANuB,WACpC,OAAO","file":"route-NotFound.chunk.bdab8.js","sourcesContent":["import { FunctionalComponent, h } from \"preact\";\n\nconst NotFound: FunctionalComponent = () => {\n  return <div>\n    Not Found\n  </div>;\n};\n\nexport default NotFound;"],"sourceRoot":""}

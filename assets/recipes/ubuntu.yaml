@@ -1,0 +1,39 @@
+params:
+  DIST:
+    possible-value:
+      - ubuntu
+  RELEASE:
+    description: The formal release name of the ubuntu version
+    possible-value:
+      - focal
+      - bionic
+      - xenial
+    obtained-by: cat /etc/apt/sources.list | awk '{ print $3 }' | grep -v - | head -n 1
+  BASE:
+    description: The base of the mirror
+    default: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
+
+steps:
+  change-sources-list:
+    replace: /etc/apt/sources.list
+    with: |
+      deb {BASE} {RELEASE} main restricted universe multiverse
+      deb {BASE} {RELEASE}-security main restricted universe multiverse
+      deb {BASE} {RELEASE}-backports main restricted universe multiverse
+      deb {BASE} {RELEASE}-updates main restricted universe multiverse
+      # Enable if you want to get proposed packages
+      # deb {BASE} {RELEASE}-proposed main restricted universe multiverse
+
+      deb-src {BASE} {RELEASE} main restricted universe multiverse
+      deb-src {BASE} {RELEASE}-security main restricted universe multiverse
+      deb-src {BASE} {RELEASE}-backports main restricted universe multiverse
+      deb-src {BASE} {RELEASE}-updates main restricted universe multiverse
+      # Enable if you want to get proposed packages
+      # deb-src {BASE} {RELEASE}-proposed main restricted universe multiverse
+
+procedures:
+  - when:
+      DIST: ubuntu
+    steps:
+      - do: change-sources-list
+      - run: sudo apt update
