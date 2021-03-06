@@ -5,10 +5,10 @@ function getName(fn: string): string {
   return fn.match(/\/(.*).ya?ml$/)?.[1] ?? '';
 }
 
-export const RECIPES: Record<string, object> = recipesCtx
+export const RECIPES: Record<string, Record<string, any>> = recipesCtx
   .keys()
   .reduce((acc, cur) => ({ ...acc, [getName(cur)]: recipesCtx(cur) }), {});
 
-export const PRESETS: Record<string, object> = presetsCtx
+export const PRESETS: Record<string, Record<string, any>> = presetsCtx
   .keys()
   .reduce((acc, cur) => ({ ...acc, [getName(cur)]: presetsCtx(cur) }), {});

@@ -1,1 +1,74 @@
 @import "../styles/shared.scss";
+@import "../styles/consts.scss";
+
+.title-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  .title {
+    margin-top: 0;
+  }
+
+  .sep {
+    font-size: 24px;
+    margin: 0 20px;
+    color: rgba(255,255,255,.38);
+  }
+
+  margin-top: 40px;
+}
+
+.preset {
+  flex: 1;
+}
+
+.hint {
+  color: rgba(255,255,255,.38);
+  font-size: 12px;
+  line-height: 24px;
+  @include sans;
+}
+
+.warning {
+  font-size: 12px;
+  background: rgba(255,255,255,.1);
+  padding: 20px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.counter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  @include monospace;
+}
+
+.entry {
+  padding: 10px 20px;
+  background: change-color($primary, $alpha: .1);
+  border-left: $primary 10px solid;
+  display: block;
+  text-decoration: none;
+  margin-top: 10px;
+
+  &-title {
+    color: mix($primary, white, 50%);
+    font-size: 24px;
+    font-weight: 900;
+    @include monospace;
+  }
+
+  &-desc {
+    color: rgba(255,255,255,.38);
+    font-size: 12px;
+    line-height: 24px;
+    @include sans;
+  }
+
+  &.non-applicable {
+    filter: grayscale(1);
+  }
+}

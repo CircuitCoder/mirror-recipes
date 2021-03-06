@@ -7,7 +7,7 @@ import NotFound from "./routes/NotFound";
 import Recipe from "./routes/Recipe";
 import List from "./routes/List";
 
-type SiteRef = Record<string, any>
+type SiteRef = string;
 
 type State = {
   site: SiteRef | null,
