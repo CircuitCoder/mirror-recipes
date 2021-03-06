@@ -25,4 +25,5 @@ code {
   border-left: $primary 5px solid;
   background: change-color($primary, $alpha: .1);
   @include monospace;
+  margin: 0 5px;
 }

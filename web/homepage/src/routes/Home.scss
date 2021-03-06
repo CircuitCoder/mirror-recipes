@@ -1,5 +1,6 @@
 @import "../styles/font.scss";
 @import "../styles/consts.scss";
+@import "../styles/shared.scss";
 
 .container {
   max-width: 760px;
@@ -10,11 +11,6 @@
 .banner {
   background: rgba(255,255,255,.1);
   padding: 60px 0;
-}
-
-.title {
-  @include monospace;
-  font-size: 48px;
 }
 
 .button {

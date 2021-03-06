@@ -1,6 +1,4 @@
-import App from "./components/app";
-import _ from './styles/global.scss';
-
-console.log(_);
+import App from './app';
+import './styles/global.scss';
 
 export default App;

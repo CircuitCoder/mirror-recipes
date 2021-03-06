@@ -1,0 +1,13 @@
+@import "./font.scss";
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 20px 40px;
+}
+
+.title {
+  @include monospace;
+  font-size: 48px;
+  margin-top: 40px;
+}
