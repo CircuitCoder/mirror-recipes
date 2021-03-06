@@ -1,3 +1,5 @@
+set -e
+
 mkdir -p output
 
 tar -czf output/presets.tgz presets
