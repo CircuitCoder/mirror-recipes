@@ -25,7 +25,7 @@ const List: FunctionalComponent = () => {
   const [shown, setShown] = useState(false);
 
   return (
-    <>
+    <Fragment>
       <div class={style.container}>
         <div class={style.breadcrumb}>
           <Link href="/">mirror-recipes</Link>
@@ -73,7 +73,7 @@ const List: FunctionalComponent = () => {
           );
         })}
       </div>
-    </>
+    </Fragment>
   );
 };
 

@@ -75,7 +75,7 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
   });
 
   return (
-    <>
+    <Fragment>
       {changable.map(({ key, param, input, valid }) => {
         let inputArea;
         const pv = param["possible-value"];
@@ -168,7 +168,7 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
         ) : (
           <div class="mr-failed">No applicable procedure found</div>
         ))}
-    </>
+    </Fragment>
   );
 };
 

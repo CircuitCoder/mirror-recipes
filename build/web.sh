@@ -1,3 +1,5 @@
+mkdir -p output
+
 cd web/homepage
 yarn --frozen-lockfile
 yarn build

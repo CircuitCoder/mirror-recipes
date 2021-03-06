@@ -19,7 +19,7 @@ const Recipe: FunctionalComponent<Params> = ({ id }: Params) => {
   const resolved = preset ? resolvePreset(preset, id) : {};
 
   return (
-    <>
+    <Fragment>
       <div class={style.container}>
         <div class={style.breadcrumb}>
           <Link href="/">mirror-recipes</Link>
@@ -40,7 +40,7 @@ const Recipe: FunctionalComponent<Params> = ({ id }: Params) => {
           params={resolved}
         ></Renderer>
       </div>
-    </>
+    </Fragment>
   );
 };
 

@@ -5,7 +5,7 @@ import { Link } from "preact-router";
 
 const Home: FunctionalComponent = () => {
   return (
-    <>
+    <Fragment>
       <div class={style.banner}>
         <div class={style.container}>
           <div class={style.title}>mirror-recipes</div>
@@ -90,7 +90,7 @@ const Home: FunctionalComponent = () => {
           the GitHub repository.
         </p>
       </div>
-    </>
+    </Fragment>
   );
 };
 
