@@ -1,0 +1,24 @@
+params:
+  DIST:
+    possible-value:
+      - archlinux
+  URL:
+    description: The URL of the mirror
+  TOOL:
+    description: The tool you use
+    possible-value:
+      - yay
+      - yaourt
+
+procedures:
+  - when:
+      DIST: archlinux
+      TOOL: yay
+    steps:
+      - run: yay --aururl "{URL}" --save
+  - when:
+      DIST: archlinux
+      TOOL: yaourt
+    steps:
+      - append: /etc/yaourtrc
+      - with: AURURL="{URL}"

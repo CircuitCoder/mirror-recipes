@@ -6,3 +6,7 @@ shared:
 presets:
   ubuntu:
     BASE: "{SITE_BASE}/ubuntu"
+  AUR:
+    URL: "https://aur.mirrors.tuna.tsinghua.edu.cn/"
+  archlinux:
+    BASE: "{SITE_BASE}/archlinux"
