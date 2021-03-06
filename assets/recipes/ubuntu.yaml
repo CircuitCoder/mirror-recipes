@@ -11,7 +11,6 @@ params:
     obtained-by: cat /etc/apt/sources.list | awk '{ print $3 }' | grep -v - | head -n 1
   BASE:
     description: The base of the mirror
-    default: https://mirrors.tuna.tsinghua.edu.cn/ubuntu
 
 steps:
   change-sources-list:

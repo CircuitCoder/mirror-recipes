@@ -1,0 +1,14 @@
+params:
+  DIST:
+    possible-value:
+      - archlinux
+  BASE:
+    description: The base of the mirror
+
+procedures:
+  - when:
+      DIST: archlinux
+    steps:
+      - replace: /etc/pacman.d/mirrorlist
+        with: Server = {BASE}/$repo/os/$arch
+      - run: pacman -Syy
