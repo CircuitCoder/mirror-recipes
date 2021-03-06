@@ -1,0 +1,28 @@
+@import "./consts.scss";
+@import "./font.scss";
+
+body {
+  background: #212121;
+  margin: 0;
+  padding: 0;
+
+  color: rgba(255,255,255,.87);
+  font-size: 16px;
+  line-height: 32px;
+}
+
+strong {
+  color: mix($primary, white, 50%);
+}
+
+a {
+  color: inherit;
+  text-decoration-style: dashed;
+}
+
+code {
+  padding: 5px 10px;
+  border-left: $primary 5px solid;
+  background: change-color($primary, $alpha: .1);
+  @include monospace;
+}

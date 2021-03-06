@@ -21,6 +21,7 @@
     ]
   },
   "dependencies": {
+    "clsx": "^1.1.1",
     "mirror-recipes-renderer": "link:../renderer",
     "preact": "^10.3.1",
     "preact-render-to-string": "^5.1.4",
@@ -35,8 +36,11 @@
     "enzyme-adapter-preact-pure": "^2.2.0",
     "eslint": "^6.8.0",
     "eslint-config-preact": "^1.1.1",
+    "node-sass": "^5.0.0",
     "preact-cli": "^3.0.0",
     "prettier": "^2.2.1",
+    "sass": "^1.32.8",
+    "sass-loader": "10.1.1",
     "sirv-cli": "^1.0.0-next.3",
     "typescript": "^3.7.5",
     "yaml-loader": "^0.6.0"
