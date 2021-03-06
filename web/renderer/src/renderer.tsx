@@ -14,9 +14,19 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
       .map((key) => [key, recipe.params[key].default])
       .filter((e) => !!e[1])
       .reduce((acc, [key, val]) => ({ ...acc, [key]: val }), {});
+
+    // Single possibility
+    const single = Object.keys(recipe.params)
+      .filter((key) => {
+        let pv = recipe.params[key]['possible-value']
+        return Array.isArray(pv) && pv.length === 1;
+      })
+      .map((key) => [key, recipe.params[key]['possible-value'][0]])
+      .reduce((acc, [key, val]) => ({ ...acc, [key]: val }), {});
     
     return {
       ...defaults,
+      ...single,
       ...input,
       ...params,
     };
@@ -25,10 +35,11 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
 
   const tuple = Object.keys(recipe.params).map(key => {
     const param = recipe.params[key];
+    const match = param['possible-value'];
     let valid = false;
+
     if(!input[key]) valid = !!param.default;
     else {
-      const match = param['possible-value'];
       if(Array.isArray(match)) valid = match.includes(input[key]);
       else if(typeof match === 'string') {
         const regex = new RegExp(match);
@@ -37,15 +48,18 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
       else valid = true;
     }
 
+    const fixed = Array.isArray(match) && match.length === 1;
+
     return {
       key,
       param,
       input: input[key],
       valid,
+      fixed,
     };
   });
 
-  const changable = tuple.filter(e => !(e.key in params));
+  const changable = tuple.filter(e => !(e.key in params) && !e.fixed);
 
   return <>
     {changable.map(({ key, param, input, valid }) => {
