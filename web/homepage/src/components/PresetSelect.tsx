@@ -1,6 +1,6 @@
 import { FunctionalComponent, h, Fragment } from "preact";
 import { useContext } from "preact/hooks";
-import { Ctx } from '../app';
+import { Ctx } from './App';
 import { PRESETS } from "../assets/data";
 
 const PresetSelect: FunctionalComponent = () => {

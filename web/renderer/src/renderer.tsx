@@ -1,5 +1,6 @@
 import { FunctionalComponent, h, Fragment } from "preact";
 import { useMemo, useState } from "preact/hooks";
+import Step from './step';
 
 type Params = {
   recipe: Record<string, any>;
@@ -64,47 +65,109 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
 
   const changable = tuple.filter(e => !(e.key in params) && !e.fixed);
 
-  const validated = tuple.every(e => e.valid);
+  const valid = tuple.every(e => e.valid);
+  // Procedure select
+  const proc = recipe.procedures.find((e: Record<string, any>) => {
+    if(!e.when) return true;
+    for(const key in e.when)
+      if(e.when[key] !== joined[key]) return false;
+    return true;
+  });
 
-  return <>
-    {changable.map(({ key, param, input, valid }) => {
-      let inputArea;
-      const pv = param['possible-value'];
-      if(Array.isArray(pv))
-        inputArea = <select value={input} class="mr-param-select" onChange={e => {
-          setInput(input => ({ ...input, [key]: e.currentTarget.value }))
-        }}>
-          <option disabled default selected>Please select</option>
-          {pv.map(value => <option key={value} value={value}>{value}</option>)}
-        </select>;
-      else 
-        inputArea = <input placeholder={param.default} value={input} class="mr-param-input" onChange={
-          e => {
-            const val = e.currentTarget.value;
-            setInput(input => {
-              if(val !== '') return { ...input, [key]: val };
-              const copied = { ...input };
-              delete copied[key];
-              return copied;
+  return (
+    <>
+      {changable.map(({ key, param, input, valid }) => {
+        let inputArea;
+        const pv = param["possible-value"];
+        if (Array.isArray(pv))
+          inputArea = (
+            <select
+              value={input}
+              class="mr-param-select"
+              onChange={(e) => {
+                setInput((input) => ({
+                  ...input,
+                  [key]: e.currentTarget.value,
+                }));
+              }}
+            >
+              <option disabled default selected>
+                Please select
+              </option>
+              {pv.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          );
+        else
+          inputArea = (
+            <input
+              placeholder={param.default}
+              value={input}
+              class="mr-param-input"
+              onChange={(e) => {
+                const val = e.currentTarget.value;
+                setInput((input) => {
+                  if (val !== "") return { ...input, [key]: val };
+                  const copied = { ...input };
+                  delete copied[key];
+                  return copied;
+                });
+              }}
+            ></input>
+          );
+
+        let hint = [];
+        if (param["obtained-by"])
+          hint.push(
+            <div class="mr-hint">
+              Try execute <code>{param["obtained-by"]}</code>
+            </div>
+          );
+        if (typeof pv === "string")
+          hint.push(
+            <div class="mr-hint">
+              Should match <code>{pv}</code>
+            </div>
+          );
+
+        return (
+          <div class="mr-param">
+            <div class="mr-param-title">{key}</div>
+            {inputArea}
+            {hint}
+          </div>
+        );
+      })}
+
+      {valid && <div class="mr-sep" />}
+
+      {valid &&
+        (proc ? (
+          proc.steps
+            .map((e: Record<string, any>) => {
+              if (e.do) return recipe.steps[e.do];
+              else return e;
             })
-          }
-        }></input>;
-
-      let hint = [];
-      if(param['obtained-by']) hint.push(<div class="mr-hint">Try execute <code>{param['obtained-by']}</code></div>)
-      if(typeof pv === 'string') hint.push(<div class="mr-hint">Should match <code>{pv}</code></div>)
-      
-      return <div class="mr-param">
-        <div class="mr-param-title">{key}</div>
-        {inputArea}
-        {hint}
-      </div>
-    })}
-    {JSON.stringify(tuple.map(e => [e.key, e.valid, e.value]))}
-
-    {JSON.stringify(params)}
-    {JSON.stringify(input)}
-  </>;
+            .map((e: Record<string, any>, idx: number) => (
+              <Step
+                step={e}
+                params={joined}
+                number={
+                  <div class="mr-step-number">
+                    <span class="mr-step-number-hint">Step</span>
+                    {idx + 1}/{proc.steps.length}
+                  </div>
+                }
+              />
+            ))
+        ) : (
+          <div class="mr-failed">No applicable procedure found</div>
+        ))}
+    </>
+  );
 };
 
 export default Renderer;

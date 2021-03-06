@@ -1,4 +1,4 @@
-function expand(_val: string, params: Record<string, string>): string {
+export function expand(_val: string, params: Record<string, string>): string {
   let val = _val;
   const regex = /\{ *([A-Z0-9_]+) *\}/g;
   let match: RegExpExecArray | null;
@@ -8,7 +8,7 @@ function expand(_val: string, params: Record<string, string>): string {
     modifications.push([
       match.index,
       regex.lastIndex,
-      params[dependency] ?? '',
+      params[dependency] ?? `[${dependency}]`,
     ]);
   }
 

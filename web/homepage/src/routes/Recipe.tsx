@@ -4,7 +4,7 @@ import style from './Recipe.scss';
 import Renderer from 'mirror-recipes-renderer';
 import { resolvePreset } from "../util";
 import { useContext } from "preact/hooks";
-import { Ctx } from "../app";
+import { Ctx } from "../components/App";
 import PresetSelect from "../components/PresetSelect";
 
 type Params = {

@@ -1,5 +1,5 @@
 import { FunctionalComponent, h, Fragment } from "preact";
-import { Ctx } from '../app';
+import { Ctx } from '../components/App';
 import style from './List.scss';
 import clsx from 'clsx';
 import { useContext, useMemo, useState } from "preact/hooks";

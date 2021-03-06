@@ -88,11 +88,6 @@ const Home: FunctionalComponent = () => {
           the GitHub repository.
         </p>
       </div>
-
-      <div class={style.footer}>
-        Made with &lt;3 by TUNA contributors. Contents within this site are
-        distributed under the MIT License.
-      </div>
     </>
   );
 };

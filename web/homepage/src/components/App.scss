@@ -1,0 +1,15 @@
+.footer {
+  height: 100px;
+  margin-top: 80px;
+  font-size: 12px;
+  color: rgba(255,255,255,.38);
+  background: rgba(0,0,0,.5);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inner {
+  min-height: calc(100vh - 180px);
+}
