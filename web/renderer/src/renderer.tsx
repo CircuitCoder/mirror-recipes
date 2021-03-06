@@ -107,8 +107,9 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
               placeholder={param.default}
               value={input}
               class="mr-param-input"
-              onChange={(e) => {
+              onInput={(e) => {
                 const val = e.currentTarget.value;
+                console.log(val);
                 setInput((input) => {
                   if (val !== "") return { ...input, [key]: val };
                   const copied = { ...input };
@@ -136,6 +137,7 @@ const Renderer: FunctionalComponent<Params> = ({ recipe, params }: Params) => {
         return (
           <div class="mr-param">
             <div class="mr-param-title">{key}</div>
+            <div class="mr-param-desc">{param.description}</div>
             {inputArea}
             {hint}
           </div>

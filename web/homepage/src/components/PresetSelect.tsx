@@ -2,12 +2,14 @@ import { FunctionalComponent, h, Fragment } from "preact";
 import { useContext } from "preact/hooks";
 import { Ctx } from './App';
 import { PRESETS } from "../assets/data";
+import style from './PresetSelect.scss';
 
 const PresetSelect: FunctionalComponent = () => {
   const { state, dispatch } = useContext(Ctx);
 
   return (
     <select
+      class={style.select}
       value={state.site ?? "__unset__"}
       onChange={(e) =>
         dispatch({
