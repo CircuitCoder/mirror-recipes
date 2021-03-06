@@ -21,4 +21,4 @@ procedures:
       TOOL: yaourt
     steps:
       - append: /etc/yaourtrc
-      - with: AURURL="{URL}"
+        with: AURURL="{URL}"
