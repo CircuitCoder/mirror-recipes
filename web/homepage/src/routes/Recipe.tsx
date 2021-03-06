@@ -5,6 +5,7 @@ import Renderer from 'mirror-recipes-renderer';
 import { resolvePreset } from "../util";
 import { useContext } from "preact/hooks";
 import { Ctx } from "../app";
+import PresetSelect from "../components/PresetSelect";
 
 type Params = {
   id: string,
@@ -24,6 +25,7 @@ const Recipe: FunctionalComponent<Params> = ({ id }: Params) => {
           <div class={style.sep}>/</div>
           <div class={style.preset}>
             <div class={style.hint}>Preset</div>
+            <PresetSelect />
           </div>
         </div>
 

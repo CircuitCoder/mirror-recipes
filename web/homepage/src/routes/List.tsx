@@ -5,9 +5,10 @@ import clsx from 'clsx';
 import { useContext, useMemo, useState } from "preact/hooks";
 import { PRESETS, RECIPES } from '../assets/data';
 import { Link } from "preact-router";
+import PresetSelect from "../components/PresetSelect";
 
 const List: FunctionalComponent = () => {
-  const { state, dispatch } = useContext(Ctx);
+  const { state } = useContext(Ctx);
 
   const sorted = useMemo(() => {
     const preset = state.site ? (PRESETS[state.site] ?? null) : null;
@@ -31,28 +32,7 @@ const List: FunctionalComponent = () => {
           <div class={style.sep}>/</div>
           <div class={style.preset}>
             <div class={style.hint}>Preset</div>
-
-            <select
-              value={state.site ?? "__unset__"}
-              onChange={(e) =>
-                dispatch({
-                  type: "SetSite",
-                  site:
-                    e.currentTarget.value === "__unset__"
-                      ? null
-                      : e.currentTarget.value,
-                })
-              }
-            >
-              <option value="__unset__">Unset</option>
-              <optgroup>
-                {Object.keys(PRESETS).map((k) => (
-                  <option value={k} key={k}>
-                    {k}
-                  </option>
-                ))}
-              </optgroup>
-            </select>
+            <PresetSelect />
           </div>
 
           <div class={style.counter}>
