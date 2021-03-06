@@ -25,7 +25,34 @@ a {
 code {
   padding: 5px 10px;
   border-left: $primary 5px solid;
-  background: change-color($primary, $alpha: .1);
+  background: change-color($primary, $alpha: .2);
   @include monospace;
   margin: 0 5px;
+}
+
+select, input {
+  font-size: 18px;
+  background: #333;
+  color: white;
+  border: none;
+  outline: 0;
+  padding: 5px 10px;
+}
+
+.mr-param {
+  margin-top: 20px;
+  &-title {
+    color: mix($primary, white, 50%);
+    font-weight: 900;
+    font-size: 18px;
+  }
+
+  &-input, &-select {
+    margin-left: 20px;
+  }
+}
+
+.mr-hint {
+  font-size: 12px;
+  margin-left: 20px;
 }
