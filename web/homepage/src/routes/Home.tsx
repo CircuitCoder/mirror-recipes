@@ -10,9 +10,11 @@ const Home: FunctionalComponent = () => {
         <div class={style.container}>
           <div class={style.title}>mirror-recipes</div>
           <div class={style.buttons}>
-            <button class={clsx(style.button, style.primary)}>
-              Download Driver
-            </button>
+            <a href="https://github.com/CircuitCoder/mirror-recipes/releases">
+              <button class={clsx(style.button, style.primary)}>
+                Download Driver
+              </button>
+            </a>
             <Link href="/recipe">
               <button class={style.button}>Explore Recipes</button>
             </Link>
