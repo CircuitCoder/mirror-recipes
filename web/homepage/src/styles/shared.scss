@@ -36,3 +36,28 @@
   line-height: 24px;
   @include sans;
 }
+
+.breadcrumb {
+  font-size: 12px;
+  margin-top: 40px;
+  @include monospace;
+
+  a {
+    text-decoration: none;
+    opacity: .38;
+    transition: opacity .2s ease;
+
+    &:after {
+      content: '>';
+      margin: 0 5px;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.breadcrumb + .title-row {
+  margin-top: 0;
+}

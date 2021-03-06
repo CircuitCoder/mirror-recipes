@@ -27,6 +27,10 @@ const List: FunctionalComponent = () => {
   return (
     <>
       <div class={style.container}>
+        <div class={style.breadcrumb}>
+          <Link href="/">mirror-recipes</Link>
+        </div>
+
         <div class={style["title-row"]}>
           <div class={style.title}>List</div>
           <div class={style.sep}>/</div>

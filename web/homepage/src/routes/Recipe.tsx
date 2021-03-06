@@ -6,6 +6,7 @@ import { resolvePreset } from "../util";
 import { useContext } from "preact/hooks";
 import { Ctx } from "../components/App";
 import PresetSelect from "../components/PresetSelect";
+import { Link } from "preact-router";
 
 type Params = {
   id: string,
@@ -20,6 +21,11 @@ const Recipe: FunctionalComponent<Params> = ({ id }: Params) => {
   return (
     <>
       <div class={style.container}>
+        <div class={style.breadcrumb}>
+          <Link href="/">mirror-recipes</Link>
+          <Link href="/recipe">List</Link>
+        </div>
+
         <div class={style["title-row"]}>
           <div class={style.title}>{id}</div>
           <div class={style.sep}>/</div>
