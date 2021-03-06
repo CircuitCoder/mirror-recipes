@@ -6,7 +6,7 @@ import { useContext, useMemo, useState } from "preact/hooks";
 import { PRESETS, RECIPES } from '../assets/data';
 import { Link } from "preact-router";
 
-const NotFound: FunctionalComponent = () => {
+const List: FunctionalComponent = () => {
   const { state, dispatch } = useContext(Ctx);
 
   const sorted = useMemo(() => {
@@ -93,4 +93,4 @@ const NotFound: FunctionalComponent = () => {
   );
 };
 
-export default NotFound;
+export default List;

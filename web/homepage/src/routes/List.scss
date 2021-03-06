@@ -1,33 +1,8 @@
 @import "../styles/shared.scss";
 @import "../styles/consts.scss";
 
-.title-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-
-  .title {
-    margin-top: 0;
-  }
-
-  .sep {
-    font-size: 24px;
-    margin: 0 20px;
-    color: rgba(255,255,255,.38);
-  }
-
-  margin-top: 40px;
-}
-
 .preset {
   flex: 1;
-}
-
-.hint {
-  color: rgba(255,255,255,.38);
-  font-size: 12px;
-  line-height: 24px;
-  @include sans;
 }
 
 .warning {
