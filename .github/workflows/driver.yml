@@ -32,7 +32,7 @@ jobs:
           args: --release --manifest-path driver/Cargo.toml
 
       - run: |
-          mv target/release/mirror-recipes-driver ./mirror-recipes-driver-linux-amd64
+          mv driver/target/release/mirror-recipes-driver ./mirror-recipes-driver-linux-amd64
 
       - name: Upload to releases
         uses: softprops/action-gh-release@v1
@@ -78,7 +78,7 @@ jobs:
           args: --release --target armv7-unknown-linux-gnueabihf --manifest-path driver/Cargo.toml
 
       - run: |
-          mv target/armv7-unknown-linux-gnueabihf/release/mirror-recipes-driver ./mirror-recipes-driver-linux-armv7hf
+          mv driver/target/armv7-unknown-linux-gnueabihf/release/mirror-recipes-driver ./mirror-recipes-driver-linux-armv7hf
 
       - name: Upload to releases
         uses: softprops/action-gh-release@v1
