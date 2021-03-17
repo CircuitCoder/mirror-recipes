@@ -27,3 +27,6 @@ which = "4.0.2"
 
 [profile.release]
 lto = true
+
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"
