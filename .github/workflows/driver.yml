@@ -60,6 +60,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-armv7hf-
 
+      - name: Setup GCC
+        run: |
+          apt update
+          apt install gcc-arm-linux-gnueabihf
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
