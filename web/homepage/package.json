@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "clsx": "^1.1.1",
-    "mirror-recipes-renderer": "link:../renderer",
     "preact": "^10.3.1",
     "preact-render-to-string": "^5.1.4",
     "preact-router": "^3.2.1"
