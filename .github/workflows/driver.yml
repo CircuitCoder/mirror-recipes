@@ -32,7 +32,7 @@ jobs:
           args: --release --manifest-path driver/Cargo.toml
 
       - run: |
-          mv driver/target/release/driver ./driver-linux-amd64
+          mv target/release/driver ./driver-linux-amd64
 
       - name: Upload to releases
         uses: softprops/action-gh-release@v1
@@ -73,7 +73,7 @@ jobs:
           args: --release --target armv7-unknown-linux-gnueabihf --manifest-path driver/Cargo.toml
 
       - run: |
-          mv driver/target/armv7-unknown-linux-gnueabihf/release/driver ./driver-linux-armv7hf
+          mv target/armv7-unknown-linux-gnueabihf/release/driver ./driver-linux-armv7hf
 
       - name: Upload to releases
         uses: softprops/action-gh-release@v1
