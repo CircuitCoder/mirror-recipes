@@ -1,0 +1,69 @@
+name: Driver build
+on: [push]
+jobs:
+  linux-amd64:
+    name: Build Linux amd64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Build + install binaries
+        uses: actions-rs/cargo@v1
+        working-directory: driver
+        with:
+          command: build
+          args: --release
+
+      - run: |
+          mv driver/target/release/driver ./driver-linux-amd64
+
+      - name: Upload to releases
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./driver-linux-amd64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  linux-armv7hf:
+    name: Build Linux armv7hf
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: armv7-unknown-linux-gnueabihf
+          override: true
+
+      - name: Build + install binaries
+        uses: actions-rs/cargo@v1
+        working-directory: driver
+        with:
+          command: build
+          args: --release --target armv7-unknown-linux-gnueabihf
+
+
+      - run: |
+          mv driver/target/armv7-unknown-linux-gnueabihf/release/driver ./driver-linux-armv7hf
+
+      - name: Upload to releases
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./driver-linux-armv7hf
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
