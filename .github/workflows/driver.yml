@@ -74,6 +74,7 @@ jobs:
       - name: Build + install binaries
         uses: actions-rs/cargo@v1
         with:
+          use-cross: true
           command: build
           args: --release --target armv7-unknown-linux-gnueabihf --manifest-path driver/Cargo.toml
 
