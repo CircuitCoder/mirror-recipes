@@ -1,5 +1,5 @@
 [package]
-name = "mirror-recipe-driver"
+name = "mirror-recipes-driver"
 version = "0.1.0"
 authors = ["Liu Xiaoyi <circuitcoder0@gmail.com>"]
 edition = "2018"
