@@ -17,10 +17,9 @@ jobs:
 
       - name: Build + install binaries
         uses: actions-rs/cargo@v1
-        working-directory: driver
         with:
           command: build
-          args: --release
+          args: --release --manifest-path driver/Cargo.toml
 
       - run: |
           mv driver/target/release/driver ./driver-linux-amd64
@@ -49,11 +48,9 @@ jobs:
 
       - name: Build + install binaries
         uses: actions-rs/cargo@v1
-        working-directory: driver
         with:
           command: build
-          args: --release --target armv7-unknown-linux-gnueabihf
-
+          args: --release --target armv7-unknown-linux-gnueabihf --manifest-path driver/Cargo.toml
 
       - run: |
           mv driver/target/armv7-unknown-linux-gnueabihf/release/driver ./driver-linux-armv7hf
