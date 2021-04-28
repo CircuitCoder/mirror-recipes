@@ -514,7 +514,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mirror-recipe-driver"
+name = "mirror-recipes-driver"
 version = "0.1.0"
 dependencies = [
  "anyhow",

@@ -26,4 +26,4 @@ tempfile = "3.2.0"
 which = "4.0.2"
 
 [profile.release]
-lto = true
+lto = "thin"
