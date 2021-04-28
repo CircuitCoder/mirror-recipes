@@ -72,11 +72,12 @@ jobs:
           override: true
 
       - name: Build + install binaries
-        uses: actions-rs/cargo@v1
+        uses: marcopolo/cargo@a527bf4d534717ff4424a84446c5d710f8833139
         with:
           use-cross: true
           command: build
-          args: --release --target aarch64-unknown-linux-gnu --manifest-path driver/Cargo.toml
+          args: --release --target aarch64-unknown-linux-gnu
+          working-directory: driver
 
       - run: |
           mv driver/target/aarch64-unknown-linux-gnu/release/mirror-recipes-driver ./mirror-recipes-driver-linux-aarch64
