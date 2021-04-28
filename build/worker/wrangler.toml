@@ -1,0 +1,7 @@
+name = "homepage"
+type = 'webpack'
+route = 'mirror-recipes.thu.fail/*'
+usage_model = ''
+workers_dev = true
+target_type = "webpack"
+site = {bucket = "../../output",entry-point = "workers-site"}

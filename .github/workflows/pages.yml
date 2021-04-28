@@ -1,10 +1,7 @@
 name: GitHub Pages deploy
-on:
-  push:
-    branches:
-      - master
+on: [push]
 jobs:
-  build-and-deploy:
+  pages:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,8 +28,19 @@ jobs:
           build/package.sh
           build/web.sh
 
-      - name: Deploy
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/master'
         uses: JamesIves/github-pages-deploy-action@4.1.0
         with:
           branch: gh-pages
           folder: output
+
+      - name: Deploy to Cloudflare Worker
+        # if: github.ref == 'refs/heads/master'
+        uses: cloudflare/wrangler-action@1.2.0
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          workingDirectory: build/worker
