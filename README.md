@@ -1,5 +1,4 @@
 # mirror-recipes
-------
 
 This is a WIP effort to provider general recipes for applying mirrors of various opensource projects. The recipes can be executed (with a driver) as a script, used as a source to render help entries, or directly used as a reference for command-line users.
 
@@ -35,3 +34,5 @@ This is a WIP effort. Some important design descisions are still to be made:
 - An POC driver is written in Rust, so we get CLI options / readline / highlighting easily. How to distribute statically-linked executables to multiple OSes?
 - [x] Recursive variable expansion?
 - [ ] Preset inheritance
+- [ ] Packed preset/recipe distribution for simpler updating
+- [ ] Viewing recipe with driver
