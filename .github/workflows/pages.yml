@@ -36,7 +36,7 @@ jobs:
           folder: output
 
       - name: Deploy to Cloudflare Worker
-        # if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         uses: cloudflare/wrangler-action@1.2.0
         env:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}

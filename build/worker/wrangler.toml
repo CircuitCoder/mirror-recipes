@@ -1,4 +1,4 @@
-name = "homepage"
+name = "mirror-recipes"
 type = 'webpack'
 route = 'mirror-recipes.thu.fail/*'
 usage_model = ''
