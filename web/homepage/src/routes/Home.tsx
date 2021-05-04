@@ -18,6 +18,11 @@ const Home: FunctionalComponent = () => {
             <Link href="/recipe">
               <button class={style.button}>Explore Recipes</button>
             </Link>
+            <a href="https://github.com/CircuitCoder/mirror-recipes">
+              <button class={style.button}>
+                GitHub
+              </button>
+            </a>
           </div>
         </div>
       </div>
@@ -87,7 +92,7 @@ const Home: FunctionalComponent = () => {
 
         <p>
           For more guidance, please refer to the <code>CONTRIBUTE</code> file in
-          the GitHub repository.
+          <a href="https://github.com/CircuitCoder/mirror-recipes">the GitHub repository</a>.
         </p>
       </div>
     </Fragment>
